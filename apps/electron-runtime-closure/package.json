@@ -1,0 +1,10 @@
+{
+  "name": "dsh-electron-runtime-closure",
+  "description": "Deploy root for the Electron desktop shell: production closure of dsh web only.",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@deepseek-ai/dsh": "workspace:^"
+  }
+}

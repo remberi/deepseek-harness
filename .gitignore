@@ -38,6 +38,11 @@ python/**/__pycache__/
 python/**/.pytest_cache/
 packages/**/__pycache__/
 apps/web/dist/
+apps/electron/lib/
+apps/electron/release/
+apps/electron/resources/
+apps/electron/build/icon.png
+apps/electron/build/icon.ico
 .artifacts/
 .dsh-build/
 .playwright-mcp/

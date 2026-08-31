@@ -1,0 +1,89 @@
+{
+  "name": "@deepseek-ai/dsh-electron",
+  "description": "Electron desktop shell for DeepSeek Harness Web UI",
+  "version": "0.1.2-alpha.2",
+  "private": true,
+  "type": "module",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "icons": "node scripts/generate-icons.mjs",
+    "prepare:resources": "node scripts/generate-icons.mjs && node scripts/prepare-resources.mjs",
+    "start": "node scripts/generate-icons.mjs && electron .",
+    "pack": "pnpm run prepare:resources && pnpm run build && electron-builder",
+    "dist": "pnpm run prepare:resources && pnpm run build && electron-builder"
+  },
+  "build": {
+    "appId": "com.deepseek.dsh",
+    "productName": "DeepSeek Harness",
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "lib/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/harness",
+        "to": "harness",
+        "filter": [
+          "**/*",
+          "!**/*.map",
+          "!**/*.d.ts",
+          "!**/*.d.ts.map",
+          "!**/tests/**",
+          "!**/__tests__/**"
+        ]
+      }
+    ],
+    "icon": "build/icon.png",
+    "electronLanguages": [
+      "en-US",
+      "zh-CN"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "differentialPackage": true,
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "sharp": "^0.35.3",
+    "to-ico": "^1.1.5",
+    "typescript": "^6.0.3"
+  }
+}

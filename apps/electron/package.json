@@ -5,6 +5,9 @@
   "private": true,
   "type": "module",
   "main": "lib/main.js",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "icons": "node scripts/generate-icons.mjs",
@@ -21,6 +24,7 @@
     "asarUnpack": [
       "**/*.node"
     ],
+    "npmRebuild": false,
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -80,7 +84,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "electron": "^35.0.0",
+    "electron": "^44.1.0",
     "electron-builder": "^25.1.8",
     "sharp": "^0.35.3",
     "to-ico": "^1.1.5",

@@ -5,6 +5,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@deepseek-ai/dsh": "workspace:^"
+    "@deepseek-ai/dsh": "workspace:^",
+    "@deepseek-ai/dsh-web-app": "workspace:^",
+    "@deepseek-ai/dsh-web-frontend": "workspace:^"
   }
 }

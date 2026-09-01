@@ -117,6 +117,10 @@ export async function pruneHarness(root) {
           await dropPath(path)
           continue
         }
+        if (entry.name === 'src' && directory.endsWith(`${sep}node_modules${sep}koffi`)) {
+          await walk(path)
+          continue
+        }
         if (entry.name === 'src') {
           const libDir = join(directory, 'lib')
           try {

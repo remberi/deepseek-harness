@@ -5,7 +5,7 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { app, BrowserWindow, nativeImage, shell, type NativeImage } from 'electron'
+import { app, BrowserWindow, dialog, nativeImage, shell, type NativeImage } from 'electron'
 
 const ELECTRON_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const REPO_ROOT = join(ELECTRON_ROOT, '..', '..')
@@ -19,6 +19,30 @@ let mainWindow: BrowserWindow | undefined
 function harnessRoot(): string {
   if (app.isPackaged) return join(process.resourcesPath, 'harness')
   return REPO_ROOT
+}
+
+/**
+ * Electron's embedded Node is the runtime that `dsh web` inherits through
+ * `ELECTRON_RUN_AS_NODE`. It must match the harness `engines.node` floor
+ * (`^22.19.0 || >=24.0.0`); Node 22.14 and earlier lack the `node:zlib`
+ * zstd APIs session persistence imports.
+ */
+function assertHarnessNode(): void {
+  const version = process.versions.node
+  const [majorRaw, minorRaw] = version.split('.')
+  const major = Number(majorRaw)
+  const minor = Number(minorRaw)
+  if ((major === 22 && minor >= 19) || major >= 24) return
+  throw new Error(
+    `dsh-electron: Node ${version} is below ^22.19.0 || >=24.0.0; Electron must ship Node 22.19+ or 24+ (Electron 44.1 ships Node 24.19)`,
+  )
+}
+
+function failBoot(error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error)
+  console.error(`dsh-electron: ${message}`)
+  dialog.showErrorBox('DeepSeek Harness', message)
+  app.exit(1)
 }
 
 /** Resolve how to launch `dsh web` for the current layout. */
@@ -88,11 +112,14 @@ function waitForWebUrl(child: ChildProcess): Promise<string> {
 
 /** Spawn `dsh web --no-open` using Electron's embedded Node runtime. */
 async function startDshWeb(): Promise<string> {
+  assertHarnessNode()
   const root = harnessRoot()
   const { nodeArgs, dshArgs } = resolveDshLaunch(root)
   const child = spawn(
     process.execPath,
-    [...nodeArgs, ...dshArgs],
+    // Cordis HMR reads Node's internal ESM loader; without this flag the web
+    // profile prints its URL then exits when the HMR plugin loads.
+    ['--expose-internals', ...nodeArgs, ...dshArgs],
     {
       cwd: root,
       env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
@@ -164,11 +191,7 @@ if (!gotLock) {
   })
 
   app.whenReady().then(() => {
-    boot().catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error)
-      console.error(`dsh-electron: ${message}`)
-      app.exit(1)
-    })
+    boot().catch(failBoot)
   })
 
   app.on('window-all-closed', () => {
@@ -182,11 +205,7 @@ if (!gotLock) {
 
   app.on('activate', () => {
     if (mainWindow === undefined && BrowserWindow.getAllWindows().length === 0) {
-      void boot().catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : String(error)
-        console.error(`dsh-electron: ${message}`)
-        app.exit(1)
-      })
+      void boot().catch(failBoot)
     }
   })
 }

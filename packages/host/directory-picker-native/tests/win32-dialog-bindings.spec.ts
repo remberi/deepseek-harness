@@ -125,6 +125,16 @@ function installFakeKoffi(world: ComWorld, options: {
               world.keyEvents.push({ vk, flags })
               world.nativeOrder.push(flags === 0 ? 'alt-down' : 'alt-up')
             }
+            case 'lstrcpynW': return (dest: Buffer, src: FakePtr, maxChars: number) => {
+              dest.fill(0)
+              dest.write((src.text as string).slice(0, Math.max(0, maxChars - 1)), 'utf16le')
+              return dest
+            }
+            case 'lstrlenW': return (ptr: Buffer) => {
+              let end = 0
+              while (end + 1 < ptr.length && !(ptr[end] === 0 && ptr[end + 1] === 0)) end += 2
+              return end / 2
+            }
             case 'SetThreadDpiAwarenessContext': {
               if (!world.hasThreadDpi) throw new Error(`${dll}: SetThreadDpiAwarenessContext not found`)
               return (context: unknown) => {

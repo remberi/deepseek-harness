@@ -14,6 +14,7 @@ import type { Win32DialogWorkerMessage } from '../src/win32-dialog-worker.ts'
 
 class FakeWorker extends EventEmitter implements Win32DialogWorkerLike {
   kill = vi.fn(() => true)
+  stderr?: NodeJS.ReadableStream | null
   post(message: Win32DialogWorkerMessage): void {
     this.emit('message', message)
   }
@@ -93,7 +94,20 @@ describe('pickWin32Directory', () => {
     const silent = harness()
     const exiting = pickWin32Directory(live(), silent.internals)
     silent.worker.emit('exit', 0)
-    await expect(exiting).rejects.toThrow('exited before reporting a result')
+    await expect(exiting).rejects.toThrow('exited before reporting a result (code 0)')
+
+    const logged = harness()
+    const stderrListeners: Array<(chunk: string | Buffer) => void> = []
+    logged.worker.stderr = {
+      on(event: string, listener: (chunk: string | Buffer) => void) {
+        if (event === 'data') stderrListeners.push(listener)
+        return this
+      },
+    } as NodeJS.ReadableStream
+    const loggedExit = pickWin32Directory(live(), logged.internals)
+    for (const listener of stderrListeners) listener('koffi boom\n')
+    logged.worker.emit('exit', null)
+    await expect(loggedExit).rejects.toThrow('exited before reporting a result (no code: koffi boom)')
   })
 
   it('settles once: a late exit after the result is inert', async () => {

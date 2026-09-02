@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-02-electron-koffi-view-fatal.md
+2026-09-02-electron-koffi-view-fatal.md: ce7371dcd07b13fdb5e25188a84191c7f6e98d7e
+2026-09-02-electron-koffi-view-fatal.zh.md: 27b48c02dd49c96063e3c531fe57097188e14217

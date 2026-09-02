@@ -53,7 +53,7 @@ The backend is a thin service over a platform chooser: `NativeDirectoryPicker` r
 
 ### Platform mechanics
 
-Platform tools run without a shell: `osascript` on macOS, and Zenity with a KDialog fallback on Linux; the caller's abort terminates the native process. Windows opens the modern `IFileOpenDialog` in a spawned child process — a koffi-driven COM conversation on the child's main thread with the best thread DPI awareness the host accepts (per-monitor-v2 first), aborted by posting `WM_CLOSE` to the dialog thread. Immediately before `Show`, the child synthesizes one Alt press through `keybd_event`, which lets the dialog activate as the foreground window even when a background host process spawned the child.
+Platform tools run without a shell: `osascript` on macOS, and Zenity with a KDialog fallback on Linux; the caller's abort terminates the native process. Windows opens the modern `IFileOpenDialog` in a spawned child process — a koffi-driven COM conversation on the child's main thread with the best thread DPI awareness the host accepts (per-monitor-v2 first), aborted by posting `WM_CLOSE` to the dialog thread. Immediately before `Show`, the child synthesizes one Alt press through `keybd_event`, which lets the dialog activate as the foreground window even when a background host process spawned the child. That child always receives `ELECTRON_RUN_AS_NODE=1` and a small allowlisted environment so a packaged Electron `process.execPath` runs the worker as Node instead of a second GUI instance.
 
 ### Source map
 

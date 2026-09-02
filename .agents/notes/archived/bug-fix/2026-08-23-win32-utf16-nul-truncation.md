@@ -11,9 +11,9 @@ English | [中文](2026-08-23-win32-utf16-nul-truncation.zh.md)
 
 ## Decision
 
-The scan ends only when both bytes of a code unit are zero, still advancing two bytes at a time over the same 32KiB `koffi.view` buffer. A regression test drives `readUtf16` through the existing fake koffi COM world with a path containing 安卓开发 (U+5F00), so the termination rule is proven without a real Windows host.
+The translation is wchar-counted: `readUtf16` copies the COM PWSTR with `lstrcpynW` and measures the copy with `lstrlenW` ([Electron-safe copy](2026-09-02-electron-koffi-view-fatal.md)), so a U+XX00 code unit is not treated as UTF-16 NUL. A regression test drives this through the existing fake koffi COM world with a path containing 安卓开发 (U+5F00), so the termination rule is proven without a real Windows host.
 
-The fix is adopted verbatim from the community patch series on the `fix/win32-utf16-nul-truncation` branch of the ericcaiwx-star fork — [c8aac14703](https://github.com/ericcaiwx-star/deepseek-harness/commit/c8aac14703a517b8db1573f9ca4ed94dc58e276b) for the scan fix and [e1d6265cb9](https://github.com/ericcaiwx-star/deepseek-harness/commit/e1d6265cb930a0a74cba03c40e73ed872a83575f) for the fixture cleanup — reported in [discussion #580](https://github.com/deepseek-ai/deepseek-harness/discussions/580) (earlier reported in [discussion #563](https://github.com/deepseek-ai/deepseek-harness/discussions/563)). Both cherry-picks retain the original author, ericcaiwx-star; the upstream fork is the source of record for the patch.
+The U+XX00 scan fix is adopted from the community patch series on the `fix/win32-utf16-nul-truncation` branch of the ericcaiwx-star fork — [c8aac14703](https://github.com/ericcaiwx-star/deepseek-harness/commit/c8aac14703a517b8db1573f9ca4ed94dc58e276b) for the original scan and [e1d6265cb9](https://github.com/ericcaiwx-star/deepseek-harness/commit/e1d6265cb930a0a74cba03c40e73ed872a83575f) for the fixture cleanup — reported in [discussion #580](https://github.com/deepseek-ai/deepseek-harness/discussions/580) (earlier reported in [discussion #563](https://github.com/deepseek-ai/deepseek-harness/discussions/563)). Both cherry-picks retain the original author, ericcaiwx-star; the upstream fork is the source of record for the patch.
 
 ## Alternatives considered
 
@@ -26,5 +26,4 @@ The fix is adopted verbatim from the community patch series on the `fix/win32-ut
 ## Consequences
 
 - Any path containing a U+XX00 code unit survives the picker translation; paths with such characters (for example Chinese folder names) can be selected and used to create workspaces.
-- The fix changes no ABI usage, buffer size, or dialog flow; the COM child-process architecture in the [Win32 folder dialog note](../feature/2026-08-02-win32-in-process-folder-dialog.md) is untouched.
-- Real-dialog rendering and selection remain a manual Windows check; this change's regression test exercises only the byte-to-string translation against the fake COM world. The fixture path is synthetic (`C:\fixture\安卓开发`) so no real user path appears in the repository.
+- Real-dialog rendering and selection remain a manual Windows check; this change's regression test exercises only the path translation against the fake COM world. The fixture path is synthetic (`C:\fixture\安卓开发`) so no real user path appears in the repository.

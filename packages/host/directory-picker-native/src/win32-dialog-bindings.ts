@@ -28,19 +28,33 @@ interface Koffi {
 }
 
 /**
- * Read a valid NUL-terminated UTF-16 allocation without an external buffer.
- * Generic `koffi.decode(..., 'str16')` expects a pointer variable, so the
- * buffer holds the string address rather than the string bytes.
- * @param koffi - the loaded koffi binding.
- * @param address - the string address surfaced by the `_Out_ void **` param.
- * @param pointerSize - the process's pointer width (`koffi.sizeof('void *')`).
- * @returns the decoded UTF-16 path.
+ * Wide-char capacity for one filesystem path, including the terminating NUL.
+ * Matches Windows' extended-length path limit (`UNICODE_STRING` max).
  */
-function readUtf16(koffi: Koffi, address: unknown, pointerSize: number): string {
-  const pointer = Buffer.alloc(8)
-  // koffi 3 surfaces `_Out_ void **` values as BigInt native addresses.
-  pointer.writeBigUInt64LE(BigInt(address as bigint | number))
-  return koffi.decode(pointer.subarray(0, pointerSize), 'str16') as string
+const UTF16_PATH_CHARS = 32_768
+
+/**
+ * Copy a NUL-terminated UTF-16 string from a native address into a JS-owned
+ * buffer. koffi's `_Out_ void **` out-params surface a raw address, and
+ * `koffi.decode(addr, 'str16')` would dereference it as a pointer. `koffi.view`
+ * maps that address as an external ArrayBuffer and fatals under Electron
+ * (`napi_create_external_arraybuffer`); `lstrcpynW` copies into memory Node
+ * already owns. `lstrlenW` counts UTF-16 code units, so a U+XX00 character
+ * (e.g. 开 = U+5F00) is not treated as NUL.
+ * @param lstrcpynW - `kernel32!lstrcpynW`.
+ * @param lstrlenW - `kernel32!lstrlenW`.
+ * @param address - the COM-allocated PWSTR from `GetDisplayName`.
+ * @returns the decoded path.
+ */
+function readUtf16(
+  lstrcpynW: KoffiFunction,
+  lstrlenW: KoffiFunction,
+  address: unknown,
+): string {
+  const copied = Buffer.alloc(UTF16_PATH_CHARS * 2)
+  lstrcpynW(copied, address, UTF16_PATH_CHARS)
+  const chars = lstrlenW(copied) as number
+  return copied.subarray(0, chars * 2).toString('utf16le')
 }
 
 const COINIT_APARTMENTTHREADED = 0x2
@@ -106,6 +120,8 @@ export async function loadWin32DialogBindings(): Promise<Win32DialogBindings> {
   const coTaskMemFree = ole32.func('__stdcall', 'CoTaskMemFree', 'void', ['void *'])
   const getCurrentThreadId = kernel32.func('__stdcall', 'GetCurrentThreadId', 'uint32', [])
   const keybdEvent = user32.func('__stdcall', 'keybd_event', 'void', ['uint8', 'uint8', 'uint32', 'uintptr'])
+  const lstrcpynW = kernel32.func('__stdcall', 'lstrcpynW', 'void *', ['void *', 'void *', 'int'])
+  const lstrlenW = kernel32.func('__stdcall', 'lstrlenW', 'int', ['void *'])
 
   const protoShow = koffi.proto('int32 __stdcall DshDialogShow(void *self, void *owner)')
   const protoSetOptions = koffi.proto('int32 __stdcall DshDialogSetOptions(void *self, uint32 options)')
@@ -167,7 +183,7 @@ export async function loadWin32DialogBindings(): Promise<Win32DialogBindings> {
             const nameOut: unknown[] = [null]
             const gotName = method(item, SLOT_GET_DISPLAY_NAME, protoGetDisplayName)(SIGDN_FILESYSPATH, nameOut)
             if (gotName < 0) return { hr: gotName }
-            const path = readUtf16(koffi, nameOut[0], pointerSize)
+            const path = readUtf16(lstrcpynW, lstrlenW, nameOut[0])
             coTaskMemFree(nameOut[0])
             return { hr: gotName, path }
           } finally {

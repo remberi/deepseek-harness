@@ -18,7 +18,7 @@ export interface Win32DialogWorkerLike {
    */
   on(event: 'message', listener: (message: Win32DialogWorkerMessage) => void): unknown
   on(event: 'error', listener: (error: Error) => void): unknown
-  on(event: 'exit', listener: (code: number) => void): unknown
+  on(event: 'exit', listener: (code: number | null) => void): unknown
   /**
    * Force-stop the child; the abort path's last resort when `WM_CLOSE`
    * never lands (e.g. the dialog window was never created).
@@ -30,6 +30,10 @@ export interface Win32DialogWorkerLike {
    * child stuck in the native modal call never blocks process exit.
    */
   unref?(): void
+  /**
+   * Piped child stderr when the real spawn captures it; fakes omit this.
+   */
+  stderr?: NodeJS.ReadableStream | null
 }
 
 /** Injectable process surface for deterministic driver tests. */
@@ -49,6 +53,19 @@ export const DIALOG_TITLE = 'Select Workspace Directory'
 const CLOSE_RETRY_MS = 150
 /** Abort-service attempts before force-terminating the worker. */
 const CLOSE_MAX_ATTEMPTS = 20
+
+/**
+ * Format the silent-exit diagnostic: the OS status plus any stderr the
+ * child flushed before dying.
+ * @param code - `exit` status; null when the child was signalled.
+ * @param stderr - accumulated child stderr.
+ * @returns the parenthetical detail appended to the silent-exit error.
+ */
+function exitDetail(code: number | null | undefined, stderr: string): string {
+  const status = code === null || code === undefined ? 'no code' : `code ${String(code)}`
+  const log = stderr.trim()
+  return log === '' ? status : `${status}: ${log}`
+}
 
 /** Fail loudly if the closed worker-to-driver union gains an unhandled member. */
 /* v8 ignore start -- closed-union backstop; unreachable without a TypeScript contract violation */
@@ -145,14 +162,20 @@ export async function pickWin32Directory(
           assertNever(message)
       }
     })
+    let stderr = ''
+    worker.stderr?.on('data', (chunk: string | Buffer) => {
+      stderr += String(chunk)
+    })
     worker.on('error', (error: Error) => {
       settle(() => {
         reject(error)
       })
     })
-    worker.on('exit', () => {
+    worker.on('exit', (code) => {
       settle(() => {
-        reject(new Error('win32 folder dialog worker exited before reporting a result'))
+        reject(new Error(
+          `win32 folder dialog worker exited before reporting a result (${exitDetail(code, stderr)})`,
+        ))
       })
     })
   })

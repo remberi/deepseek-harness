@@ -1,0 +1,68 @@
+/* Docked whale girl: offsets from the bottom-right corner come from inline style; click-through except for the character itself. */
+
+.dock {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.character {
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.dock[data-interaction='click'] .character {
+  cursor: pointer;
+}
+
+.dock[data-interaction='click'] .character:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+.dock[data-dragging='true'] .character,
+.dock[data-dragging='true'] .character:active {
+  cursor: grabbing;
+  transform: scale(1.04);
+}
+
+.character:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.bubble {
+  max-width: 220px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 12px;
+  border-bottom-right-radius: 4px;
+  background: var(--dsw-alias-bg-layer-3);
+  box-shadow: var(--dsw-elevation-soft);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+  animation: pop 160ms ease-out;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
+  }
+}

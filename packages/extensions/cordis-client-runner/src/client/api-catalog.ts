@@ -266,7 +266,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
   {
     key: 'theme',
     summary: 'Theme registry and preference owner.',
-    description: 'Theme registry and preference owner. `light`/`dark` are built in (the base stylesheets carry both palettes); third-party themes register alias-layer overrides. Reads go through getTheme; preference writes only through setTheme; continuous sync only through the `theme/change` event. overrideTokens stacks partial token layers over the active theme without touching the registry. The service holds the `prefers-color-scheme` media query (environment sensing, not presentation) and re-emits when the OS scheme flips while the preference is `system`.',
+    description: 'Theme registry and preference owner. The built-in catalog is registered first: `light`/`dark` override nothing (the base stylesheets carry both palettes) and the tinted themes carry alias-layer overrides; third-party themes register further alias-layer overrides. Reads go through getTheme; preference writes only through setTheme; continuous sync only through the `theme/change` event. overrideTokens stacks partial token layers over the active theme without touching the registry. The service holds the `prefers-color-scheme` media query (environment sensing, not presentation) and re-emits when the OS scheme flips while the preference is `system`.',
     methods: [
       {
         signature: 'getTheme(): ThemeSnapshot',
@@ -286,7 +286,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: 'register(definition: ThemeDefinition): () => void',
-        description: 'Register a theme. Duplicate id throws (single occupant per id; the built-in pair counts; `system` is a preference, not a registrable id).',
+        description: 'Register a theme. Duplicate id throws (single occupant per id; the built-in catalog counts; `system` is a preference, not a registrable id).',
         parameters: [{ name: 'definition', description: 'theme id, colorScheme, and alias-token overrides.' }],
         returns: 'disposer. Disposing the theme backing the active preference resets the preference to the default so the UI never keeps tokens of an unregistered theme.',
       },

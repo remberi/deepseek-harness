@@ -266,6 +266,11 @@
     - id: ui-settings-unarchive-sessions
       name: '@deepseek-ai/dsh-client-ui-settings-unarchive-sessions'
 
+    # Whale-girl 2D companion: the Settings page that shows or hides her and
+    # selects her pointer reaction, plus the character in the shell overlay.
+    - id: ui-companion
+      name: '@deepseek-ai/dsh-client-ui-companion'
+
     - id: ui-conversation
       name: '@deepseek-ai/dsh-client-ui-conversation'
 

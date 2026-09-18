@@ -13,6 +13,9 @@
     - button "Agent presets":
       - img
       - text: Agent presets
+    - button "Virtual character":
+      - img
+      - text: Virtual character
     - button "Archived sessions":
       - img
       - text: Archived sessions
@@ -38,6 +41,9 @@
   - button "System" [pressed]:
     - img
     - text: System
+  - button "Sepia"
+  - button "Ocean"
+  - button "Midnight"
   - text: Font size Only affects conversation content 14
   - button "Increase font size":
     - img

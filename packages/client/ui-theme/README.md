@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-client-ui-theme` lets Web GUI users choose `light`, `dark`, or `system` and set conversation content text from 12 to 17 px in Settings. A loopback client stores both values in the `ui-theme` settings namespace, which the local provider persists in `$DSH_HOME/settings.yaml` by default. The plugin resolves `system` through `prefers-color-scheme` and publishes immutable `ThemeSnapshot`s; ui-layout applies each snapshot to the document. The package also ships the `--dsw-*` token stylesheets and injects a synchronous bootstrap so the selected palette and font size apply before the shell loads. Third-party themes can register alias-token overrides through `ctx.theme`.
+`dsh-client-ui-theme` lets Web GUI users choose `light`, `dark`, `system`, or one of three tinted built-in themes (`sepia`, `ocean`, `midnight`) and set conversation content text from 12 to 17 px in Settings. A loopback client stores both values in the `ui-theme` settings namespace, persisted in `$DSH_HOME/settings.yaml` by default. The plugin resolves `system` through `prefers-color-scheme` and publishes immutable `ThemeSnapshot`s; ui-layout applies each snapshot to the document. The package also ships the `--dsw-*` token stylesheets and injects a synchronous bootstrap so the selected palette and font size apply before the shell loads. Third-party themes can register alias-token overrides through `ctx.theme`.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ Users switch the color scheme and content font size from two rows in Settings (G
 
 ### Appearance and font size
 
-The plugin registers Appearance preference cubes and a font-size stepper in the General section. The stepper accepts integer values from 12 through 17 px and defaults to 14 px. It changes conversation headings and base text by the same increment, including the user bubble and composer draft; flow-row titles, summaries, and tables follow one step under the body size, while small text and code keep fixed sizes. Each accepted change writes through the Host settings API. Rapid changes serialize in gesture order with namespace revisions, and a rejected latest write reloads the durable values. Non-loopback pages keep both choices process-local.
+The plugin registers Appearance preference cubes and a font-size stepper in the General section. The Appearance row shows one cube per built-in preference: Light, Dark, and System carry icons, and the three tinted themes carry a canvas/accent swatch. A tinted theme builds on the light (`sepia`, `ocean`) or dark (`midnight`) base palette and overrides one shared alias-token set with the values in `src/theme-settings.ts`; selecting it persists its id exactly like the base pair. The stepper accepts integer values from 12 through 17 px and defaults to 14 px. It changes conversation headings and base text by the same increment, including the user bubble and composer draft; flow-row titles, summaries, and tables follow one step under the body size, while small text and code keep fixed sizes. Each accepted change writes through the Host settings API. Rapid changes serialize in gesture order with namespace revisions, and a rejected latest write reloads the durable values. Non-loopback pages keep both choices process-local.
 
 ### Registering a theme
 
@@ -37,7 +37,7 @@ A composition can register a third-party theme id with alias-token overrides thr
 
 ### Pre-plugin palette
 
-When the host composition includes an HTTP server, the host half embeds the registered `ui-theme` settings, or schema defaults, into each index response. Head CSS selects the document canvas color scheme before any script runs, including a `prefers-color-scheme` query for the `system` preference. A body script then sets `body[data-ds-dark-theme]` and `--dsh-content-font-size` before the loading page and application scripts, so the first paint uses the selected palette and text size.
+When the host composition includes an HTTP server, the host half embeds the registered `ui-theme` settings, or schema defaults, into each index response. Head CSS selects the document canvas color scheme before any script runs, including a `prefers-color-scheme` query for the `system` preference. A body script then sets `body[data-ds-dark-theme]` and `--dsh-content-font-size` before the loading page and application scripts, so the first paint uses the selected palette and text size. For a tinted preference the head CSS paints that theme's canvas and the body script also writes its alias tokens as inline `body` variables; `html[data-ds-theme-preference]` carries the preference id the browser registry seeds its first snapshot from, while `html[data-ds-theme-source]` always carries the resolved scheme or `system` for native chrome mirroring.
 
 -----
 
@@ -99,7 +99,7 @@ None; this package neither assembles nor sends a provider request.
 These limits define the theme extension surface and the color authority; they are current package constraints.
 
 - **Third-party themes are an extension point, not a product** — registering one means overriding same-named alias variables; no validation exists that an override set is complete.
-- **The token sheets are the sole color authority** — values absent from the design system are deliberately not appended; the nearest semantic token wins, and design-owner-approved additions enter as a static step plus a semantic alias in the same change.
+- **The token sheets are the sole color authority for the base palettes** — values absent from the design system are deliberately not appended to the sheets; the nearest semantic token wins, and design-owner-approved additions enter as a static step plus a semantic alias in the same change. The tinted built-in themes carry their literal alias values in `src/theme-settings.ts` as override layers and add no static steps.
 
 <a id="dev-note"></a>
 ### Dev Note

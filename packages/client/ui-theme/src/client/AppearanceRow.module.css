@@ -16,19 +16,20 @@
   color: var(--dsw-alias-label-primary);
 }
 
+/* Auto-fill grid rather than a wrapping flex row: seven cubes wrap onto more
+ * than one row, and a grid keeps a short last row at the same cube width. */
 .cubeRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   align-items: stretch;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 /* Appearance cube (figma '.Selector Cube' 276x82 r16, pad 20/32, centered
- * icon-over-label column, gap 4); flexed down from the figma width so all
- * three sit on one row in the 800 panel, wrapping when narrower. */
+ * icon-over-label column, gap 4); sized by the grid column so four sit on
+ * one row in the 800 panel, wrapping when narrower. */
 .themeCube {
   box-sizing: border-box;
-  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -54,4 +55,17 @@
 .selected {
   background: var(--dsw-alias-bg-module-platform);
   border-color: var(--dsw-static-neutral-bluish-400);
+}
+
+/* Tinted-theme swatch in the icon seat: a 16px disc split diagonally between
+ * the theme's canvas and accent, both supplied inline by the cube from the
+ * theme catalog (theme data, not a component color). */
+.swatch {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  corner-shape: round;
+  border: 0.5px solid var(--dsw-alias-border-l4);
+  background: linear-gradient(135deg, var(--dsh-theme-swatch-canvas) 50%, var(--dsh-theme-swatch-accent) 50%);
 }

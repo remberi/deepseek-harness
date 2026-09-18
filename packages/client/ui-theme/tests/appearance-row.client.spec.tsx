@@ -22,6 +22,9 @@ const COPY: Record<string, string> = {
   'appearance.light': 'Light',
   'appearance.dark': 'Dark',
   'appearance.system': 'System',
+  'appearance.sepia': 'Sepia',
+  'appearance.ocean': 'Ocean',
+  'appearance.midnight': 'Midnight',
 }
 
 function emptySessions() {
@@ -63,12 +66,31 @@ const pressed = (name: RegExp): string | null =>
   screen.getByRole('button', { name }).getAttribute('aria-pressed')
 
 describe('AppearanceRow', () => {
-  it('renders the title and three cubes with the preference cube selected', () => {
+  it('renders the title and one cube per built-in preference with the preference cube selected', () => {
     mount('dark')
     expect(screen.getByText('Appearance')).toBeDefined()
+    expect(screen.getAllByRole('button').map(button => button.textContent))
+      .toEqual(['Light', 'Dark', 'System', 'Sepia', 'Ocean', 'Midnight'])
     expect(pressed(/Dark/)).toBe('true')
     expect(pressed(/Light/)).toBe('false')
     expect(pressed(/System/)).toBe('false')
+    expect(pressed(/Sepia/)).toBe('false')
+  })
+
+  it('base cubes carry icons; tinted cubes carry a swatch fed by the theme canvas and accent', () => {
+    const b = mount('midnight')
+    expect(pressed(/Midnight/)).toBe('true')
+    const light = screen.getByRole('button', { name: /Light/ })
+    expect(light.querySelector('svg')).not.toBeNull()
+    expect(light.querySelector('span')).toBeNull()
+    const midnight = screen.getByRole('button', { name: /Midnight/ })
+    expect(midnight.querySelector('svg')).toBeNull()
+    const swatch = midnight.querySelector('span')
+    expect(swatch?.getAttribute('aria-hidden')).toBe('true')
+    expect(swatch?.style.getPropertyValue('--dsh-theme-swatch-canvas')).toBe('rgb(14, 19, 32)')
+    expect(swatch?.style.getPropertyValue('--dsh-theme-swatch-accent')).toBe('rgb(150, 182, 255)')
+    fireEvent.click(midnight)
+    expect(b.setTheme).toHaveBeenCalledWith('midnight')
   })
 
   it('click drives setTheme; selection follows the store mirror, not the click echo', () => {

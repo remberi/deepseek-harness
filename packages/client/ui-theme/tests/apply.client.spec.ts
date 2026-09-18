@@ -206,7 +206,7 @@ describe('ui-theme apply', () => {
 
   it('ignores an invalid preference crossing the settings wire', async () => {
     const b = await bench()
-    b.setHostSection({ preference: 'sepia' })
+    b.setHostSection({ preference: 'neon' })
     b.events.emit('settings/document-updated', [THEME_SETTINGS_NAMESPACE, 0])
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const theme = b.ctx.get('theme') as ThemeRuntime

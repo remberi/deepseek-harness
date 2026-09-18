@@ -21,8 +21,9 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   delete document.documentElement.dataset.dsThemeSource
+  delete document.documentElement.dataset.dsThemePreference
   document.body.removeAttribute(DARK_ATTRIBUTE)
-  document.body.style.removeProperty('--dsh-content-font-size')
+  document.body.removeAttribute('style')
 })
 
 describe('theme bootstrap row', () => {
@@ -37,7 +38,28 @@ describe('theme bootstrap row', () => {
     if (body?.kind !== 'script') throw new Error('theme body bootstrap row is not a script')
     runInNewContext(body.text, { document, matchMedia: globalThis.matchMedia })
     expect(document.documentElement.dataset.dsThemeSource).toBe('dark')
+    expect(document.documentElement.dataset.dsThemePreference).toBe('dark')
     expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(true)
+    // The base pair overrides no tokens: body carries only the font size.
+    expect(document.body.style.length).toBe(1)
+  })
+
+  it.each([
+    ['sepia', 'light', 'rgb(249, 244, 234)'],
+    ['ocean', 'light', 'rgb(238, 245, 252)'],
+    ['midnight', 'dark', 'rgb(14, 19, 32)'],
+  ] as const)('paints the %s canvas and tokens; the theme source publishes the resolved scheme', (preference, scheme, canvas) => {
+    // A dark OS never leaks into a fixed tinted preference.
+    mockSystemDark(scheme === 'light')
+    const [head] = bootThemeInjections(preference)
+    if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
+    expect(head.text).toBe(`:root{color-scheme:${scheme}}body{background-color:${canvas};--dsh-boot-bg:${canvas}}`)
+    executeBootstrap(preference)
+    expect(document.documentElement.dataset.dsThemePreference).toBe(preference)
+    expect(document.documentElement.dataset.dsThemeSource).toBe(scheme)
+    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(scheme === 'dark')
+    expect(document.body.style.getPropertyValue('--dsw-alias-bg-base')).toBe(canvas)
+    expect(document.body.style.getPropertyValue('--dsw-alias-brand-primary')).not.toBe('')
   })
 
   it('lets durable light override a dark OS and clears stale dark state', () => {

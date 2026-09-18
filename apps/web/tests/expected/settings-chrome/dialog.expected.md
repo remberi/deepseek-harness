@@ -13,6 +13,9 @@
     - button "Agent 预设":
       - img
       - text: Agent 预设
+    - button "虚拟人物":
+      - img
+      - text: 虚拟人物
     - button "已归档会话":
       - img
       - text: 已归档会话
@@ -38,6 +41,9 @@
   - button "跟随系统" [pressed]:
     - img
     - text: 跟随系统
+  - button "暖纸"
+  - button "海洋"
+  - button "午夜"
   - text: 字号大小 仅影响会话内容的字号 14
   - button "增大字号":
     - img

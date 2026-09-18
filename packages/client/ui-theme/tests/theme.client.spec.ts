@@ -30,7 +30,33 @@ describe('ThemeRuntime', () => {
     // jsdom matchMedia is absent; system resolves to light.
     expect(snapshot.active.id).toBe('light')
     expect(snapshot.active.colorScheme).toBe('light')
-    expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark'])
+    expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark', 'sepia', 'ocean', 'midnight'])
+  })
+
+  it('seeds the initial preference from the boot-script root attribute, ignoring junk', () => {
+    // The Host boot script paints the tinted theme's tokens before any plugin
+    // runs; the first snapshot must carry the same theme so the presenter owns
+    // those inline tokens from its first apply.
+    document.documentElement.setAttribute('data-ds-theme-preference', 'midnight')
+    try {
+      const snapshot = make().theme.getTheme()
+      expect(snapshot.preference).toBe('midnight')
+      expect(snapshot.active.colorScheme).toBe('dark')
+      expect(snapshot.active.tokens['--dsw-alias-bg-base']).toBe('rgb(14, 19, 32)')
+      document.documentElement.setAttribute('data-ds-theme-preference', 'neon')
+      expect(make().theme.getTheme().preference).toBe('system')
+    } finally {
+      document.documentElement.removeAttribute('data-ds-theme-preference')
+    }
+  })
+
+  it('persists a tinted built-in preference and resolves its tokens without touching the registry', () => {
+    const { theme, host } = make()
+    theme.setTheme('sepia')
+    expect(host.set).toHaveBeenCalledWith('preference', 'sepia')
+    expect(theme.getTheme().active).toMatchObject({ id: 'sepia', colorScheme: 'light' })
+    expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('rgb(249, 244, 234)')
+    expect(theme.getTheme().themes).toHaveLength(5)
   })
 
   it('seeds the initial font size from the boot-script body variable, ignoring junk', () => {
@@ -109,20 +135,22 @@ describe('ThemeRuntime', () => {
 
   it('throws on unknown setTheme ids, duplicate registration, and the system id', () => {
     const { theme } = make()
-    expect(() => { theme.setTheme('sepia') }).toThrow('not registered')
+    expect(() => { theme.setTheme('neon') }).toThrow('not registered')
     expect(() => theme.register({ id: 'light', colorScheme: 'light', tokens: {} })).toThrow('already registered')
+    expect(() => theme.register({ id: 'sepia', colorScheme: 'light', tokens: {} })).toThrow('already registered')
     expect(() => theme.register({ id: 'system', colorScheme: 'light', tokens: {} })).toThrow('preference')
   })
 
   it('registered themes join the snapshot; disposing the active one resets to default', () => {
     const { theme, events, host } = make()
-    const dispose = theme.register({ id: 'sepia', colorScheme: 'light', tokens: { '--dsw-alias-bg-base': 'red' } })
-    expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark', 'sepia'])
-    theme.setTheme('sepia')
+    const builtinIds = ['light', 'dark', 'sepia', 'ocean', 'midnight']
+    const dispose = theme.register({ id: 'neon', colorScheme: 'light', tokens: { '--dsw-alias-bg-base': 'red' } })
+    expect(theme.getTheme().themes.map(t => t.id)).toEqual([...builtinIds, 'neon'])
+    theme.setTheme('neon')
     expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('red')
     dispose()
     expect(theme.getTheme().preference).toBe('system')
-    expect(theme.getTheme().themes.map(t => t.id)).toEqual(['light', 'dark'])
+    expect(theme.getTheme().themes.map(t => t.id)).toEqual(builtinIds)
     // Custom ids are in-process extension themes; only the built-in product
     // preferences cross the Host settings schema.
     expect(host.set).not.toHaveBeenCalled()
@@ -134,7 +162,7 @@ describe('ThemeRuntime', () => {
 
   it('disposing an inactive theme keeps the active preference', () => {
     const { theme } = make()
-    const dispose = theme.register({ id: 'sepia', colorScheme: 'light', tokens: {} })
+    const dispose = theme.register({ id: 'neon', colorScheme: 'light', tokens: {} })
     theme.setTheme('dark')
     dispose()
     expect(theme.getTheme().preference).toBe('dark')
@@ -144,7 +172,7 @@ describe('ThemeRuntime', () => {
     const { theme, events } = make()
     theme.setTheme('dark')
     theme.setTheme('light')
-    const dispose = theme.register({ id: 'sepia', colorScheme: 'dark', tokens: {} })
+    const dispose = theme.register({ id: 'neon', colorScheme: 'dark', tokens: {} })
     dispose()
     expect(events.map(e => e.revision)).toEqual([1, 2, 3, 4])
   })

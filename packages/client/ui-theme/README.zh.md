@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-client-ui-theme` 让 Web GUI 用户在设置中选择 `light`、`dark` 或 `system`，并把会话正文字号设为 12 至 17 px。回环客户端把两个值存入 `ui-theme` 设置命名空间，本地提供方默认将其持久化到 `$DSH_HOME/settings.yaml`。插件通过 `prefers-color-scheme` 解析 `system` 并发布不可变的 `ThemeSnapshot`；ui-layout 把每份快照应用到文档。本包还提供 `--dsw-*` token 样式表，并注入同步引导，使所选调色板与字号在外壳加载前生效。第三方主题可通过 `ctx.theme` 注册别名 token 覆盖。
+`dsh-client-ui-theme` 让 Web GUI 用户在设置中选择 `light`、`dark`、`system` 或三套内置配色主题之一（`sepia`、`ocean`、`midnight`），并把会话正文字号设为 12 至 17 px。回环客户端把两个值存入 `ui-theme` 设置命名空间，默认持久化到 `$DSH_HOME/settings.yaml`。插件通过 `prefers-color-scheme` 解析 `system` 并发布不可变的 `ThemeSnapshot`；ui-layout 把每份快照应用到文档。本包还提供 `--dsw-*` token 样式表，并注入同步引导，使所选调色板与字号在外壳加载前生效。第三方主题可通过 `ctx.theme` 注册别名 token 覆盖。
 
 ## 目录
 
@@ -29,7 +29,7 @@ kind: "package-reference"
 
 ### 外观与字号
 
-插件在「通用」分区注册外观偏好方块与字号步进器。步进器接受 12 至 17 px 的整数，默认值为 14 px。它以相同增量调整会话标题与基础文本，包括用户气泡与 composer 草稿；流内行的标题、摘要与表格跟随比正文低一档的字号，小号文本和代码保持固定字号。每次通过的变更都经 Host settings API 写入。连续快速变更按操作顺序携带命名空间 revision 串行写入，最新写入被拒时重新加载持久值。非 loopback 页面把两个选择都保留在进程内。
+插件在「通用」分区注册外观偏好方块与字号步进器。外观行为每个内置偏好显示一个方块：浅色、深色与跟随系统带图标，三套配色主题则带画布/强调色色样。配色主题建立在浅色（`sepia`、`ocean`）或深色（`midnight`）基础调色板之上，用 `src/theme-settings.ts` 中的值覆盖同一组别名 token；选中它时其 id 与基础主题对一样被持久化。步进器接受 12 至 17 px 的整数，默认值为 14 px。它以相同增量调整会话标题与基础文本，包括用户气泡与 composer 草稿；流内行的标题、摘要与表格跟随比正文低一档的字号，小号文本和代码保持固定字号。每次通过的变更都经 Host settings API 写入。连续快速变更按操作顺序携带命名空间 revision 串行写入，最新写入被拒时重新加载持久值。非 loopback 页面把两个选择都保留在进程内。
 
 ### 注册主题
 
@@ -37,7 +37,7 @@ kind: "package-reference"
 
 ### 插件前调色板
 
-当主机组合包含 HTTP 服务器时，宿主侧会把已注册的 `ui-theme` 设置或 schema 默认值嵌入每份 index 响应。head CSS 会在任何脚本运行前选择文档画布的配色方案，其中 `system` 偏好使用 `prefers-color-scheme` 查询；随后，body 脚本会在加载页面和应用脚本之前设置 `body[data-ds-dark-theme]` 与 `--dsh-content-font-size`，因此首帧绘制就采用所选调色板与字号。
+当主机组合包含 HTTP 服务器时，宿主侧会把已注册的 `ui-theme` 设置或 schema 默认值嵌入每份 index 响应。head CSS 会在任何脚本运行前选择文档画布的配色方案，其中 `system` 偏好使用 `prefers-color-scheme` 查询；随后，body 脚本会在加载页面和应用脚本之前设置 `body[data-ds-dark-theme]` 与 `--dsh-content-font-size`，因此首帧绘制就采用所选调色板与字号。对于配色主题偏好，head CSS 绘制该主题的画布色，body 脚本还会把它的别名 token 写为 `body` 上的内联变量；`html[data-ds-theme-preference]` 携带浏览器注册表为首份快照取种的偏好 id，而 `html[data-ds-theme-source]` 始终携带解析后的配色方案或 `system`，供原生窗口镜像使用。
 
 -----
 
@@ -99,7 +99,7 @@ kind: "package-reference"
 这些限制定义主题扩展表面与颜色权威；它们是当前包约束。
 
 - **第三方主题是扩展点，不是产品**：注册主题意味着覆盖同名别名变量；目前不会验证一组覆盖是否完整。
-- **token 样式表是颜色值的唯一权威来源**：设计系统中缺失的值会有意不补入；一律采用最接近的语义 token，设计负责人批准的新增值须在同一变更中以一个静态尺度层级与一个语义别名的形式进入。
+- **token 样式表是基础调色板颜色值的唯一权威来源**：设计系统中缺失的值会有意不补入样式表；一律采用最接近的语义 token，设计负责人批准的新增值须在同一变更中以一个静态尺度层级与一个语义别名的形式进入。内置配色主题把自己的字面别名值作为覆盖层放在 `src/theme-settings.ts` 中，不新增任何静态尺度层级。
 
 <a id="dev-note"></a>
 ### 开发备注

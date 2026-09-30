@@ -10,8 +10,9 @@ import {
 
 export {
   COMPANION_ENABLED_FIELD, COMPANION_INTERACTION_FIELD, COMPANION_INTERACTIONS,
-  COMPANION_SETTINGS_NAMESPACE, DEFAULT_COMPANION_ENABLED, DEFAULT_COMPANION_INTERACTION,
-  DEFAULT_COMPANION_SETTINGS, type CompanionInteraction, type CompanionSettings,
+  COMPANION_SETTINGS_NAMESPACE, CompanionSettingsSchema, DEFAULT_COMPANION_ENABLED,
+  DEFAULT_COMPANION_INTERACTION, DEFAULT_COMPANION_SETTINGS,
+  type CompanionInteraction, type CompanionSettings,
 } from './companion-settings.ts'
 
 /** Live companion visibility and pointer-reaction preferences. */

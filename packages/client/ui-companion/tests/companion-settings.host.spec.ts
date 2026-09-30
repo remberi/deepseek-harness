@@ -3,11 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { liveConfig, omitsGeneratedPage } from '../../../settings/settings/tests/live-config.ts'
 import { plainConfig } from '../../../settings/settings/src/schema.ts'
+import * as HostPlugin from '@deepseek-ai/dsh-client-ui-companion'
 import {
-  COMPANION_INTERACTIONS, CompanionSettingsSchema, DEFAULT_COMPANION_SETTINGS,
-} from '../src/companion-settings.ts'
-import * as HostPlugin from '../src/index.ts'
-import { Config, apply } from '../src/index.ts'
+  COMPANION_INTERACTIONS, CompanionSettingsSchema, Config, DEFAULT_COMPANION_SETTINGS, apply,
+} from '@deepseek-ai/dsh-client-ui-companion'
 
 describe('companion settings schema', () => {
   it('hides the character and answers clicks by default', () => {

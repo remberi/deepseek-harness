@@ -118,6 +118,21 @@ describe('Desktop local packaging configuration', () => {
     })
   })
 
+  it('uses isolated local defaults for an unsigned Mac package without a release file', async () => {
+    await withDirectory(async (directory) => {
+      const environment = loadDesktopPackageEnvironment('darwin', {
+        PATH: '/usr/bin', DSH_DESKTOP_APP_ID: 'com.example.release',
+        DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN: 'https://stale.example.com',
+        APPLE_API_KEY: 'secret', CSC_LINK: 'certificate.p12',
+      }, directory, { unsigned: true })
+      expect(environment).toEqual({ PATH: '/usr/bin', DSH_DESKTOP_APP_ID: 'com.deepseek.harness.local' })
+      expect(() => {
+        validateDesktopPackageEnvironment(environment, MACOS, { unsigned: true })
+      }).not.toThrow()
+      expect(() => loadDesktopPackageEnvironment('darwin', {}, directory)).toThrow(/copy .*\.env.macos.example/u)
+    })
+  })
+
   it('checks application and update configuration before Windows credentials while preserving unsigned and preparation modes', () => {
     expect(() => {
       validateDesktopPackageEnvironment({}, WINDOWS, { unsigned: true })

@@ -24,9 +24,16 @@ const FILE_SETTINGS = ['DSH_DESKTOP_WINDOWS_CER_FILE', 'DSH_DESKTOP_WINDOWS_SIGN
  * @param {'win32' | 'darwin'} platform Target platform.
  * @param {NodeJS.ProcessEnv} environment Parent environment, retained only for unrelated build tools.
  * @param {string} appRoot Desktop application directory; relative credential paths resolve here.
- * @returns {NodeJS.ProcessEnv} Isolated environment with file-owned release settings.
+ * @param {{ unsigned?: boolean }} options Packaging mode.
+ * @returns {NodeJS.ProcessEnv} Isolated environment with file-owned release settings or local macOS defaults.
  */
-export function loadDesktopPackageEnvironment(platform, environment = process.env, appRoot = APP_ROOT) {
+export function loadDesktopPackageEnvironment(platform, environment = process.env, appRoot = APP_ROOT, options = {}) {
+  if (platform === 'darwin' && options.unsigned) {
+    return {
+      ...Object.fromEntries(Object.entries(environment).filter(([name]) => !AMBIENT_RELEASE_SETTING.test(name))),
+      DSH_DESKTOP_APP_ID: 'com.deepseek.harness.local',
+    }
+  }
   const path = join(appRoot, platform === 'win32' ? '.env.windows' : '.env.macos')
   let contents
   try {
@@ -79,7 +86,7 @@ function requireReadableFile(environment, name) {
 export function validateDesktopPackageEnvironment(environment, target, options = {}) {
   resolveDesktopAppId(environment)
   resolveNpmRegistry(environment)
-  resolveDesktopPolicyEnvironment(environment)
+  if (!options.unsigned || target.platform === 'win32') resolveDesktopPolicyEnvironment(environment)
   if (target.platform === 'darwin') resolveMacOSPackageSettings(environment)
   else resolveWindowsPackageSettings(environment)
   if (options.unsigned) return

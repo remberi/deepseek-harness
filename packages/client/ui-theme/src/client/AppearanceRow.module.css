@@ -16,7 +16,7 @@
   color: var(--dsw-alias-label-primary);
 }
 
-/* Auto-fill grid rather than a wrapping flex row: seven cubes wrap onto more
+/* Auto-fill grid rather than a wrapping flex row: five cubes wrap onto more
  * than one row, and a grid keeps a short last row at the same cube width. */
 .cubeRow {
   display: grid;
@@ -58,15 +58,15 @@
   border-color: var(--dsw-static-neutral-bluish-400);
 }
 
-/* Tinted-theme swatch in the icon seat: a 16px disc split diagonally between
- * the theme's canvas and accent, both supplied inline by the cube from the
- * theme catalog (theme data, not a component color). */
-.swatch {
-  box-sizing: border-box;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  corner-shape: round;
-  border: 0.5px solid var(--dsw-alias-border-l4);
-  background: linear-gradient(135deg, var(--dsh-theme-swatch-canvas) 50%, var(--dsh-theme-swatch-accent) 50%);
+/* Product marks occupy the same fixed icon seat as the base theme icons. */
+.brandMark {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  object-fit: contain;
+}
+
+.claudeMark {
+  color: #d97757;
 }

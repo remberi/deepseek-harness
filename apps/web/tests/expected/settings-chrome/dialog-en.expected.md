@@ -16,9 +16,8 @@
   - button "Light"
   - button "Dark"
   - button "System" [pressed]
-  - button "Sepia"
-  - button "Ocean"
-  - button "Midnight"
+  - button "Claude Code"
+  - button "Codex"
   - text: Font size Only affects conversation content 14
   - button "Increase font size"
   - button "Decrease font size"

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-client-ui-theme` 让 Web GUI 用户在设置中选择 `light`、`dark`、`system` 或三套内置配色主题之一（`sepia`、`ocean`、`midnight`），并把会话正文字号设为 10 至 22 px。回环客户端把两个值存入 `ui-theme` 设置命名空间，本地提供方默认将其持久化到 `$DSH_HOME/cordis.patch.yml`。插件通过 `prefers-color-scheme` 解析 `system` 并发布不可变的 `ThemeSnapshot`；ui-layout 把每份快照应用到文档。本包还提供 `--dsw-*` token 样式表，并注入同步引导，使所选调色板与字号在外壳加载前生效。第三方主题可通过 `ctx.theme` 注册别名 token 覆盖。
+`dsh-client-ui-theme` 让 Web GUI 用户在设置中选择 `light`、`dark`、`system` 或两套内置配色主题之一（`claudeCode`、`codex`），并把会话正文字号设为 10 至 22 px。回环客户端把两个值存入 `ui-theme` 设置命名空间，本地提供方默认将其持久化到 `$DSH_HOME/cordis.patch.yml`。插件通过 `prefers-color-scheme` 解析 `system` 并发布不可变的 `ThemeSnapshot`；ui-layout 把每份快照应用到文档。本包还提供 `--dsw-*` token 样式表，并注入同步引导，使所选调色板与字号在外壳加载前生效。第三方主题可通过 `ctx.theme` 注册别名 token 覆盖。
 
 
 ## 目录
@@ -30,7 +30,7 @@ kind: "package-reference"
 
 ### 外观与字号
 
-插件在「通用」分区注册外观偏好方块与字号步进器。外观行为每个内置偏好显示一个方块：浅色、深色与跟随系统带图标，三套配色主题则带画布/强调色色样。配色主题建立在浅色（`sepia`、`ocean`）或深色（`midnight`）基础调色板之上，用 `src/theme-settings.ts` 中的值覆盖同一组别名 token；选中它时其 id 与基础主题对一样被持久化。步进器接受 10 至 22 px 的整数，默认值为 14 px。它以相同增量调整会话标题与基础文本，包括用户气泡与 composer 草稿；流内行的标题、摘要与表格跟随比正文低一档的字号，小号文本和代码保持固定字号。每次通过的变更都经 Host settings API 写入。连续快速变更按操作顺序携带命名空间 revision 串行写入，最新写入被拒时重新加载持久值。非 loopback 页面把两个选择都保留在进程内。
+插件在「通用」分区注册外观偏好方块与字号步进器。外观行为每个内置偏好显示一个方块：浅色、深色与跟随系统带图标，Claude Code 和 Codex 则带各自的产品标识。两套产品主题建立在浅色基础调色板之上（`claudeCode`、`codex`），用 `src/theme-settings.ts` 中的值覆盖同一组别名 token；选中它们时，其 id 与基础主题对一样被持久化。步进器接受 10 至 22 px 的整数，默认值为 14 px。它以相同增量调整会话标题与基础文本，包括用户气泡与 composer 草稿；流内行的标题、摘要与表格跟随比正文低一档的字号，小号文本和代码保持固定字号。每次通过的变更都经 Host settings API 写入。连续快速变更按操作顺序携带命名空间 revision 串行写入，最新写入被拒时重新加载持久值。非 loopback 页面把两个选择都保留在进程内。
 
 
 ### 注册主题

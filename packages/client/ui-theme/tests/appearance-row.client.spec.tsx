@@ -22,9 +22,8 @@ const COPY: Record<string, string> = {
   'appearance.light': 'Light',
   'appearance.dark': 'Dark',
   'appearance.system': 'System',
-  'appearance.sepia': 'Sepia',
-  'appearance.ocean': 'Ocean',
-  'appearance.midnight': 'Midnight',
+  'appearance.claudeCode': 'Claude Code',
+  'appearance.codex': 'Codex',
 }
 
 function emptySessions() {
@@ -70,27 +69,26 @@ describe('AppearanceRow', () => {
     mount('dark')
     expect(screen.getByText('Appearance')).toBeDefined()
     expect(screen.getAllByRole('button').map(button => button.textContent))
-      .toEqual(['Light', 'Dark', 'System', 'Sepia', 'Ocean', 'Midnight'])
+      .toEqual(['Light', 'Dark', 'System', 'Claude Code', 'Codex'])
     expect(pressed(/Dark/)).toBe('true')
     expect(pressed(/Light/)).toBe('false')
     expect(pressed(/System/)).toBe('false')
-    expect(pressed(/Sepia/)).toBe('false')
+    expect(pressed(/Claude Code/)).toBe('false')
   })
 
-  it('base cubes carry icons; tinted cubes carry a swatch fed by the theme canvas and accent', () => {
-    const b = mount('midnight')
-    expect(pressed(/Midnight/)).toBe('true')
+  it('base cubes carry icons; product themes carry their own marks', () => {
+    const b = mount('claudeCode')
+    expect(pressed(/Claude Code/)).toBe('true')
     const light = screen.getByRole('button', { name: /Light/ })
     expect(light.querySelector('svg')).not.toBeNull()
     expect(light.querySelector('span')).toBeNull()
-    const midnight = screen.getByRole('button', { name: /Midnight/ })
-    expect(midnight.querySelector('svg')).toBeNull()
-    const swatch = midnight.querySelector('span')
-    expect(swatch?.getAttribute('aria-hidden')).toBe('true')
-    expect(swatch?.style.getPropertyValue('--dsh-theme-swatch-canvas')).toBe('rgb(14, 19, 32)')
-    expect(swatch?.style.getPropertyValue('--dsh-theme-swatch-accent')).toBe('rgb(150, 182, 255)')
-    fireEvent.click(midnight)
-    expect(b.setTheme).toHaveBeenCalledWith('midnight')
+    const claude = screen.getByRole('button', { name: /Claude Code/ })
+    expect(claude.querySelector('svg[aria-hidden="true"] path')?.getAttribute('d'))
+      .toContain('M21 10.5h3v3')
+    const codex = screen.getByRole('button', { name: /Codex/ })
+    expect(codex.querySelector('img[alt=""]')?.getAttribute('src')).toContain('codex-logo.png')
+    fireEvent.click(claude)
+    expect(b.setTheme).toHaveBeenCalledWith('claudeCode')
   })
 
   it('click drives setTheme; selection follows the store mirror, not the click echo', () => {

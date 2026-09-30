@@ -30,19 +30,19 @@ describe('ThemeRuntime', () => {
     // jsdom matchMedia is absent; system resolves to light.
     expect(snapshot.active.id).toBe('light')
     expect(snapshot.active.colorScheme).toBe('light')
-    expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark', 'sepia', 'ocean', 'midnight'])
+    expect(snapshot.themes.map(t => t.id)).toEqual(['light', 'dark', 'claudeCode', 'codex'])
   })
 
   it('seeds the initial preference from the boot-script root attribute, ignoring junk', () => {
     // The Host boot script paints the tinted theme's tokens before any plugin
     // runs; the first snapshot must carry the same theme so the presenter owns
     // those inline tokens from its first apply.
-    document.documentElement.setAttribute('data-ds-theme-preference', 'midnight')
+    document.documentElement.setAttribute('data-ds-theme-preference', 'claudeCode')
     try {
       const snapshot = make().theme.getTheme()
-      expect(snapshot.preference).toBe('midnight')
-      expect(snapshot.active.colorScheme).toBe('dark')
-      expect(snapshot.active.tokens['--dsw-alias-bg-base']).toBe('rgb(14, 19, 32)')
+      expect(snapshot.preference).toBe('claudeCode')
+      expect(snapshot.active.colorScheme).toBe('light')
+      expect(snapshot.active.tokens['--dsw-alias-bg-base']).toBe('rgb(250, 248, 245)')
       document.documentElement.setAttribute('data-ds-theme-preference', 'neon')
       expect(make().theme.getTheme().preference).toBe('system')
     } finally {
@@ -52,11 +52,11 @@ describe('ThemeRuntime', () => {
 
   it('persists a tinted built-in preference and resolves its tokens without touching the registry', () => {
     const { theme, host } = make()
-    theme.setTheme('sepia')
-    expect(host.set).toHaveBeenCalledWith('preference', 'sepia')
-    expect(theme.getTheme().active).toMatchObject({ id: 'sepia', colorScheme: 'light' })
-    expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('rgb(249, 244, 234)')
-    expect(theme.getTheme().themes).toHaveLength(5)
+    theme.setTheme('claudeCode')
+    expect(host.set).toHaveBeenCalledWith('preference', 'claudeCode')
+    expect(theme.getTheme().active).toMatchObject({ id: 'claudeCode', colorScheme: 'light' })
+    expect(theme.getTheme().active.tokens['--dsw-alias-bg-base']).toBe('rgb(250, 248, 245)')
+    expect(theme.getTheme().themes).toHaveLength(4)
   })
 
   it('seeds the initial font size from the boot-script body variable, ignoring junk', () => {
@@ -137,13 +137,13 @@ describe('ThemeRuntime', () => {
     const { theme } = make()
     expect(() => { theme.setTheme('neon') }).toThrow('not registered')
     expect(() => theme.register({ id: 'light', colorScheme: 'light', tokens: {} })).toThrow('already registered')
-    expect(() => theme.register({ id: 'sepia', colorScheme: 'light', tokens: {} })).toThrow('already registered')
+    expect(() => theme.register({ id: 'claudeCode', colorScheme: 'dark', tokens: {} })).toThrow('already registered')
     expect(() => theme.register({ id: 'system', colorScheme: 'light', tokens: {} })).toThrow('preference')
   })
 
   it('registered themes join the snapshot; disposing the active one resets to default', () => {
     const { theme, events, host } = make()
-    const builtinIds = ['light', 'dark', 'sepia', 'ocean', 'midnight']
+    const builtinIds = ['light', 'dark', 'claudeCode', 'codex']
     const dispose = theme.register({ id: 'neon', colorScheme: 'light', tokens: { '--dsw-alias-bg-base': 'red' } })
     expect(theme.getTheme().themes.map(t => t.id)).toEqual([...builtinIds, 'neon'])
     theme.setTheme('neon')

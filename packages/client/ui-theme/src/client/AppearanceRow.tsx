@@ -2,22 +2,23 @@
  * Appearance preference row registered into the General section item slot
  * (figma 501:30012 'Frame 2117131228'): title + one preference cube per
  * built-in preference. The base cubes (Light, Dark, System) carry icons; the
- * tinted built-in themes carry a canvas/accent swatch derived from their own
- * tokens. Registered by this package — the theme feature owns its own
+ * Claude Code and Codex themes carry their product marks. Registered by this
+ * package — the theme feature owns its own
  * settings surface. Selection follows the persisted preference, never the
  * resolved active theme.
  */
-import type { CSSProperties } from 'react'
+import type { ReactElement } from 'react'
 import clsx from 'clsx'
 import {
   IconDarkOutlineMedium, IconFollowsystemOutlineMedium, IconLightOutlineMedium,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
-import { BUILTIN_STYLE_THEMES, type BuiltinTheme, type ThemePreference } from '../theme-settings.ts'
+import type { ThemePreference } from '../theme-settings.ts'
 import type { ThemeKey } from './locales.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { createAppearanceRowStore } from './settings-store.ts'
 import css from './AppearanceRow.module.css'
+import codexLogo from './assets/codex-logo.png'
 
 /** Injected business face: the preference write (t rides the standard locale seat). */
 export interface AppearanceRowInjected {
@@ -33,36 +34,29 @@ export type AppearanceRowComponentProps =
 interface Cube {
   id: ThemePreference
   labelKey: ThemeKey
-  /** Icon for the base cubes; swatch colors for the tinted themes. */
-  visual: { Icon: typeof IconLightOutlineMedium } | { canvas: string; accent: string }
+  visual: ReactElement
 }
 
 /** Base cube order and icons (figma 501:30015-30017: Light, Dark, System). */
 const BASE_CUBES: readonly Cube[] = [
-  { id: 'light', labelKey: 'appearance.light', visual: { Icon: IconLightOutlineMedium } },
-  { id: 'dark', labelKey: 'appearance.dark', visual: { Icon: IconDarkOutlineMedium } },
-  { id: 'system', labelKey: 'appearance.system', visual: { Icon: IconFollowsystemOutlineMedium } },
+  { id: 'light', labelKey: 'appearance.light', visual: <IconLightOutlineMedium /> },
+  { id: 'dark', labelKey: 'appearance.dark', visual: <IconDarkOutlineMedium /> },
+  { id: 'system', labelKey: 'appearance.system', visual: <IconFollowsystemOutlineMedium /> },
 ]
 
-/** Tinted cubes in catalog order; the swatch shows the theme's canvas and accent. */
-const STYLE_CUBES: readonly Cube[] = BUILTIN_STYLE_THEMES.map((theme: BuiltinTheme): Cube => ({
-  id: theme.id,
-  labelKey: `appearance.${theme.id}`,
-  visual: { canvas: theme.canvas, accent: theme.accent },
-}))
+/** Claude Code's mark follows the pinned Simple Icons artwork. */
+const claudeCodeMark = (
+  <svg className={css.brandMark} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+    <path d="M21 10.5h3v3h-3v3h-1.5v3H18v-3h-1.5v3H15v-3H9v3H7.5v-3H6v3H4.5v-3H3v-3H0v-3h3v-6h18Zm-15 0h1.5v-3H6Zm10.5 0H18v-3h-1.5z" />
+  </svg>
+)
+
+const STYLE_CUBES: readonly Cube[] = [
+  { id: 'claudeCode', labelKey: 'appearance.claudeCode', visual: <span className={css.claudeMark}>{claudeCodeMark}</span> },
+  { id: 'codex', labelKey: 'appearance.codex', visual: <img className={css.brandMark} src={codexLogo} alt="" aria-hidden /> },
+]
 
 const CUBES: readonly Cube[] = [...BASE_CUBES, ...STYLE_CUBES]
-
-function CubeVisual({ visual }: { visual: Cube['visual'] }) {
-  if ('Icon' in visual) return <visual.Icon />
-  return (
-    <span
-      aria-hidden
-      className={css.swatch}
-      style={{ '--dsh-theme-swatch-canvas': visual.canvas, '--dsh-theme-swatch-accent': visual.accent } as CSSProperties}
-    />
-  )
-}
 
 /**
  * Render the Appearance row.
@@ -83,7 +77,7 @@ export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentP
             aria-pressed={preference === id}
             onClick={() => { setTheme(id) }}
           >
-            <CubeVisual visual={visual} />
+            {visual}
             {t(labelKey)}
           </button>
         ))}

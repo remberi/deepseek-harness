@@ -8,7 +8,7 @@
 import z from '@deepseek-ai/schemastery'
 
 /** Built-in preferences accepted at the registry and settings boundaries. */
-export const THEME_PREFERENCES = ['light', 'dark', 'system', 'sepia', 'ocean', 'midnight'] as const
+export const THEME_PREFERENCES = ['light', 'dark', 'system', 'claudeCode', 'codex'] as const
 
 /** Settings namespace owned by the theme plugin. */
 export const THEME_SETTINGS_NAMESPACE = 'ui-theme'
@@ -83,8 +83,8 @@ export interface BuiltinTheme {
 
 /**
  * Role colors one tinted built-in theme supplies; {@link paletteTokens}
- * expands them to the alias tokens every tinted theme overrides, so the four
- * themes stay symmetric and no theme can miss a token another one sets.
+ * expands them to the alias tokens every tinted theme overrides, so the
+ * tinted themes stay symmetric and no theme can miss a token another one sets.
  */
 interface ThemePalette {
   /** Document canvas and base background (`--dsw-alias-bg-base`). */
@@ -198,77 +198,54 @@ export const BUILTIN_BASE_THEMES: readonly BuiltinTheme[] = Object.freeze([
 
 /**
  * Tinted built-in themes: each overrides the same alias-token set over its
- * base palette. The Appearance row renders these with a canvas/accent swatch.
+ * base palette. The Appearance row renders these with their product marks.
  */
 export const BUILTIN_STYLE_THEMES: readonly BuiltinTheme[] = Object.freeze([
-  tintedTheme('sepia', 'light', {
-    canvas: 'rgb(249, 244, 234)',
-    surface: 'rgb(252, 248, 240)',
-    surfaceRaised: 'rgb(252, 248, 240)',
-    surfaceTop: 'rgb(255, 252, 246)',
-    overlay: 'rgb(236, 228, 212)',
-    platform: 'rgb(243, 236, 222)',
-    ink: '92, 70, 40',
-    accent: 'rgb(112, 76, 40)',
-    accentHover: 'rgb(140, 98, 56)',
-    accentSoft: 'rgb(238, 224, 200)',
-    textPrimary: 'rgb(56, 44, 30)',
-    textSecondary: 'rgb(108, 92, 72)',
-    textTertiary: 'rgb(140, 124, 102)',
-    textCaption: 'rgb(176, 162, 140)',
-    codeBlock: 'rgb(244, 237, 224)',
-    inlineCode: 'rgb(240, 232, 216)',
-    bubble: 'rgb(240, 230, 212)',
-    bubbleHighlight: 'rgb(230, 214, 186)',
-    sidebar: 'rgb(243, 236, 222)',
-    sidebarActive: 'rgb(232, 222, 202)',
-    sidebarHover: 'rgb(238, 230, 214)',
+  tintedTheme('claudeCode', 'light', {
+    canvas: 'rgb(250, 248, 245)',
+    surface: 'rgb(255, 255, 253)',
+    surfaceRaised: 'rgb(246, 241, 235)',
+    surfaceTop: 'rgb(255, 255, 255)',
+    overlay: 'rgb(255, 255, 255)',
+    platform: 'rgb(243, 237, 230)',
+    ink: '65, 48, 39',
+    accent: 'rgb(171, 74, 43)',
+    accentHover: 'rgb(145, 57, 31)',
+    accentSoft: 'rgb(251, 230, 218)',
+    textPrimary: 'rgb(41, 37, 32)',
+    textSecondary: 'rgb(99, 88, 78)',
+    textTertiary: 'rgb(112, 100, 89)',
+    textCaption: 'rgb(112, 100, 89)',
+    codeBlock: 'rgb(243, 239, 234)',
+    inlineCode: 'rgb(246, 235, 227)',
+    bubble: 'rgb(250, 233, 222)',
+    bubbleHighlight: 'rgb(246, 219, 203)',
+    sidebar: 'rgb(246, 242, 237)',
+    sidebarActive: 'rgb(247, 224, 209)',
+    sidebarHover: 'rgb(239, 231, 221)',
   }),
-  tintedTheme('ocean', 'light', {
-    canvas: 'rgb(238, 245, 252)',
-    surface: 'rgb(245, 249, 254)',
-    surfaceRaised: 'rgb(245, 249, 254)',
-    surfaceTop: 'rgb(250, 252, 255)',
-    overlay: 'rgb(222, 233, 246)',
-    platform: 'rgb(230, 239, 250)',
-    ink: '24, 64, 112',
-    accent: 'rgb(22, 84, 156)',
-    accentHover: 'rgb(30, 104, 186)',
-    accentSoft: 'rgb(212, 228, 246)',
-    textPrimary: 'rgb(16, 34, 58)',
-    textSecondary: 'rgb(70, 92, 120)',
-    textTertiary: 'rgb(110, 130, 156)',
-    textCaption: 'rgb(150, 168, 190)',
-    codeBlock: 'rgb(232, 240, 250)',
-    inlineCode: 'rgb(226, 236, 248)',
-    bubble: 'rgb(220, 234, 250)',
-    bubbleHighlight: 'rgb(196, 218, 244)',
-    sidebar: 'rgb(230, 239, 250)',
-    sidebarActive: 'rgb(212, 228, 246)',
-    sidebarHover: 'rgb(222, 233, 246)',
-  }),
-  tintedTheme('midnight', 'dark', {
-    canvas: 'rgb(14, 19, 32)',
-    surface: 'rgb(19, 26, 42)',
-    surfaceRaised: 'rgb(24, 32, 52)',
-    surfaceTop: 'rgb(30, 40, 64)',
-    overlay: 'rgb(44, 58, 88)',
-    platform: 'rgb(30, 40, 64)',
-    ink: '170, 190, 240',
-    accent: 'rgb(150, 182, 255)',
-    accentHover: 'rgb(180, 204, 255)',
-    accentSoft: 'rgb(34, 46, 74)',
-    textPrimary: 'rgb(226, 232, 246)',
-    textSecondary: 'rgb(164, 176, 202)',
-    textTertiary: 'rgb(126, 140, 170)',
-    textCaption: 'rgb(96, 108, 136)',
-    codeBlock: 'rgb(11, 15, 26)',
-    inlineCode: 'rgb(30, 40, 64)',
-    bubble: 'rgb(26, 36, 60)',
-    bubbleHighlight: 'rgb(40, 54, 88)',
-    sidebar: 'rgb(10, 14, 24)',
-    sidebarActive: 'rgb(34, 46, 74)',
-    sidebarHover: 'rgb(22, 30, 50)',
+  tintedTheme('codex', 'light', {
+    canvas: 'rgb(247, 249, 252)',
+    surface: 'rgb(255, 255, 255)',
+    surfaceRaised: 'rgb(240, 244, 250)',
+    surfaceTop: 'rgb(255, 255, 255)',
+    overlay: 'rgb(255, 255, 255)',
+    platform: 'rgb(236, 242, 250)',
+    ink: '31, 50, 84',
+    accent: 'rgb(43, 84, 176)',
+    accentHover: 'rgb(31, 69, 155)',
+    accentSoft: 'rgb(224, 233, 252)',
+    textPrimary: 'rgb(28, 39, 59)',
+    textSecondary: 'rgb(79, 95, 120)',
+    textTertiary: 'rgb(104, 118, 140)',
+    textCaption: 'rgb(104, 118, 140)',
+    codeBlock: 'rgb(237, 242, 249)',
+    inlineCode: 'rgb(230, 238, 249)',
+    bubble: 'rgb(231, 240, 254)',
+    bubbleHighlight: 'rgb(214, 230, 253)',
+    sidebar: 'rgb(240, 245, 252)',
+    sidebarActive: 'rgb(222, 233, 250)',
+    sidebarHover: 'rgb(232, 240, 251)',
   }),
 ])
 

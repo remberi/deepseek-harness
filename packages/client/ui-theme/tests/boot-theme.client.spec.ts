@@ -45,19 +45,18 @@ describe('theme bootstrap row', () => {
   })
 
   it.each([
-    ['sepia', 'light', 'rgb(249, 244, 234)'],
-    ['ocean', 'light', 'rgb(238, 245, 252)'],
-    ['midnight', 'dark', 'rgb(14, 19, 32)'],
+    ['claudeCode', 'light', 'rgb(250, 248, 245)'],
+    ['codex', 'light', 'rgb(247, 249, 252)'],
   ] as const)('paints the %s canvas and tokens; the theme source publishes the resolved scheme', (preference, scheme, canvas) => {
-    // A dark OS never leaks into a fixed tinted preference.
-    mockSystemDark(scheme === 'light')
+    // A dark OS never leaks into a fixed light tinted preference.
+    mockSystemDark(true)
     const [head] = bootThemeInjections(preference)
     if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
     expect(head.text).toBe(`:root{color-scheme:${scheme}}body{background-color:${canvas};--dsh-boot-bg:${canvas}}`)
     executeBootstrap(preference)
     expect(document.documentElement.dataset.dsThemePreference).toBe(preference)
     expect(document.documentElement.dataset.dsThemeSource).toBe(scheme)
-    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(scheme === 'dark')
+    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
     expect(document.body.style.getPropertyValue('--dsw-alias-bg-base')).toBe(canvas)
     expect(document.body.style.getPropertyValue('--dsw-alias-brand-primary')).not.toBe('')
   })

@@ -27,7 +27,7 @@ describe('built-in theme catalog', () => {
       expect(theme.tokens['--dsw-alias-border-l2']).toMatch(/^rgba\(\d+, \d+, \d+, 0\.12\)$/)
     }
     expect(BUILTIN_STYLE_THEMES.map(theme => [theme.id, theme.colorScheme])).toEqual([
-      ['sepia', 'light'], ['ocean', 'light'], ['midnight', 'dark'],
+      ['claudeCode', 'light'], ['codex', 'light'],
     ])
   })
 

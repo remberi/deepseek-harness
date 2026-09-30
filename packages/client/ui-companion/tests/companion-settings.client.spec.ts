@@ -1,19 +1,13 @@
 /** Durable companion section: defaults, accepted reactions, refused values, Host registration. */
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { SettingsProvider, type SettingsNamespace } from '@deepseek-ai/dsh-settings'
+import { liveConfig, omitsGeneratedPage } from '../../../settings/settings/tests/live-config.ts'
+import { plainConfig } from '../../../settings/settings/src/schema.ts'
 import {
-  COMPANION_INTERACTIONS, COMPANION_SETTINGS_NAMESPACE, CompanionSettingsSchema, DEFAULT_COMPANION_SETTINGS,
+  COMPANION_INTERACTIONS, CompanionSettingsSchema, DEFAULT_COMPANION_SETTINGS,
 } from '../src/companion-settings.ts'
-import { apply as hostApply } from '../src/index.ts'
-
-class MemorySettings extends SettingsProvider {
-  readonly writable = true
-  protected load(): Promise<Record<string, unknown>> { return Promise.resolve({}) }
-  protected persist(_ns: SettingsNamespace, _section: Record<string, unknown>): Promise<void> {
-    return Promise.resolve()
-  }
-}
+import * as HostPlugin from '../src/index.ts'
+import { Config, apply } from '../src/index.ts'
 
 describe('companion settings schema', () => {
   it('hides the character and answers clicks by default', () => {
@@ -33,22 +27,21 @@ describe('companion settings schema', () => {
 describe('ui-companion host', () => {
   it('registers, validates, and disposes the durable namespace with its fiber', async () => {
     const ctx = new Context()
-    await ctx.plugin(MemorySettings).await()
-    const fiber = ctx.plugin({ apply: hostApply })
-    await fiber.await()
-    const ns = COMPANION_SETTINGS_NAMESPACE
-    expect(ctx.settings.get(ns)).toEqual(DEFAULT_COMPANION_SETTINGS)
-    await ctx.settings.update(ns, { enabled: true, interaction: 'follow' })
-    expect(ctx.settings.get(ns)).toEqual({ enabled: true, interaction: 'follow' })
-    await expect(ctx.settings.update(ns, { interaction: 'dance' })).rejects.toThrow()
+    const configuration = await liveConfig(ctx, { Config, apply })
+    const { fiber } = configuration
+    expect(plainConfig(configuration.fiber.config)).toEqual(DEFAULT_COMPANION_SETTINGS)
+    await configuration.update({ enabled: true, interaction: 'follow' })
+    expect(plainConfig(configuration.fiber.config)).toEqual({ enabled: true, interaction: 'follow' })
+    await expect(configuration.update({ interaction: 'dance' })).rejects.toThrow()
     await fiber.dispose()
-    expect(ctx.settings.get(ns)).toBeUndefined()
   })
 
   it('stays inert without a settings service', async () => {
     const ctx = new Context()
-    await ctx.plugin({ apply: hostApply }).await()
+    await ctx.plugin({ Config, apply }).await()
     expect(ctx.get('settings')).toBeUndefined()
     await ctx.fiber.dispose()
   })
 })
+
+it('keeps its own instance off the generated Settings pages', () => omitsGeneratedPage(ctx => ctx.plugin(HostPlugin)))

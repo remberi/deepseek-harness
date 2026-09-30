@@ -1,7 +1,7 @@
 /**
  * Browser-local companion state: the uploaded artwork and the dragged
  * position. Both stay in this browser's localStorage rather than the Host
- * settings document because an image blob does not belong in settings.yaml
+ * settings document because an image blob does not belong in cordis.patch.yml
  * and a pixel offset only means something for the viewport that produced it.
  */
 

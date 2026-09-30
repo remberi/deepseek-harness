@@ -2,7 +2,7 @@
 /** CompanionPolicy mirrors the Host section, writes explicit user choices, and keeps artwork and position locally. */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ConfigForm, ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { CompanionSettings } from '../src/companion-settings.ts'
 import { COMPANION_LOCAL_KEY, type CompanionLocalState } from '../src/client/companion-local.ts'
 import { CompanionPolicy } from '../src/client/companion-policy.ts'
@@ -10,7 +10,7 @@ import { CompanionPolicy } from '../src/client/companion-policy.ts'
 beforeEach(() => { localStorage.clear() })
 
 function fakeScope(value: CompanionSettings | undefined) {
-  const store = createSnapshotStore<SettingsScopeSnapshot<CompanionSettings>>({
+  const store = createSnapshotStore<ConfigFormSnapshot<CompanionSettings>>({
     status: value === undefined ? 'loading' : 'ready',
     value,
     base: undefined,
@@ -19,16 +19,16 @@ function fakeScope(value: CompanionSettings | undefined) {
     writable: true,
     mode: 'host',
   })
-  const set = vi.fn<SettingsScope<CompanionSettings>['set']>(() => Promise.resolve())
-  const scope: SettingsScope<CompanionSettings> = {
+  const set = vi.fn<ConfigForm<CompanionSettings>['set']>(() => Promise.resolve(true))
+  const form: ConfigForm<CompanionSettings> = {
     getSnapshot: () => store.getSnapshot(),
     subscribe: listener => store.subscribe(listener),
     set,
-    unset: () => Promise.resolve(),
-    mutate: () => Promise.resolve(),
+    unset: () => Promise.resolve(true),
+    mutate: () => Promise.resolve(true),
   }
   return {
-    scope,
+    form,
     set,
     arrive: (next: CompanionSettings) => { store.update((draft) => { draft.status = 'ready'; draft.value = next }) },
   }
@@ -37,7 +37,7 @@ function fakeScope(value: CompanionSettings | undefined) {
 describe('CompanionPolicy', () => {
   it('starts hidden with click reaction, then adopts the Host section without writing back', () => {
     const b = fakeScope(undefined)
-    const policy = new CompanionPolicy(b.scope)
+    const policy = new CompanionPolicy(b.form)
     expect(policy.settings.getSnapshot()).toEqual({ enabled: false, interaction: 'click' })
     b.arrive({ enabled: true, interaction: 'hover' })
     expect(policy.settings.getSnapshot()).toEqual({ enabled: true, interaction: 'hover' })
@@ -46,12 +46,12 @@ describe('CompanionPolicy', () => {
 
   it('adopts a section already present at construction', () => {
     const b = fakeScope({ enabled: true, interaction: 'none' })
-    expect(new CompanionPolicy(b.scope).settings.getSnapshot()).toEqual({ enabled: true, interaction: 'none' })
+    expect(new CompanionPolicy(b.form).settings.getSnapshot()).toEqual({ enabled: true, interaction: 'none' })
   })
 
   it('publishes and persists each field once per change', () => {
     const b = fakeScope({ enabled: false, interaction: 'click' })
-    const policy = new CompanionPolicy(b.scope)
+    const policy = new CompanionPolicy(b.form)
     const seen: CompanionSettings[] = []
     policy.settings.subscribe(() => { seen.push(policy.settings.getSnapshot()) })
 
@@ -71,7 +71,7 @@ describe('CompanionPolicy', () => {
   })
 
   it('keeps artwork and position in this browser, once per change, and rehydrates them', () => {
-    const policy = new CompanionPolicy(fakeScope(undefined).scope)
+    const policy = new CompanionPolicy(fakeScope(undefined).form)
     expect(policy.local.getSnapshot()).toEqual({ artwork: null, position: null })
     const seen: CompanionLocalState[] = []
     policy.local.subscribe(() => { seen.push(policy.local.getSnapshot()) })
@@ -87,7 +87,7 @@ describe('CompanionPolicy', () => {
     expect(JSON.parse(localStorage.getItem(COMPANION_LOCAL_KEY) ?? '')).toEqual(seen[1])
 
     // A fresh policy in the same browser starts from the saved state.
-    expect(new CompanionPolicy(fakeScope(undefined).scope).local.getSnapshot()).toEqual(seen[1])
+    expect(new CompanionPolicy(fakeScope(undefined).form).local.getSnapshot()).toEqual(seen[1])
 
     policy.setPosition(null)
     policy.setArtwork(null)
@@ -96,11 +96,11 @@ describe('CompanionPolicy', () => {
 
   it('discards a saved state that fails validation', () => {
     localStorage.setItem(COMPANION_LOCAL_KEY, JSON.stringify({ artwork: 7, position: { right: 'far' } }))
-    expect(new CompanionPolicy(fakeScope(undefined).scope).local.getSnapshot()).toEqual({ artwork: null, position: null })
+    expect(new CompanionPolicy(fakeScope(undefined).form).local.getSnapshot()).toEqual({ artwork: null, position: null })
     expect(localStorage.getItem(COMPANION_LOCAL_KEY)).toBeNull()
 
     localStorage.setItem(COMPANION_LOCAL_KEY, '{not json')
-    expect(new CompanionPolicy(fakeScope(undefined).scope).local.getSnapshot()).toEqual({ artwork: null, position: null })
+    expect(new CompanionPolicy(fakeScope(undefined).form).local.getSnapshot()).toEqual({ artwork: null, position: null })
     expect(localStorage.getItem(COMPANION_LOCAL_KEY)).toBeNull()
   })
 })

@@ -10,7 +10,7 @@
 import type { CSSProperties } from 'react'
 import clsx from 'clsx'
 import {
-  IconDarkOutline16, IconFollowsystemOutline16, IconLightOutline16,
+  IconDarkOutlineMedium, IconFollowsystemOutlineMedium, IconLightOutlineMedium,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import { BUILTIN_STYLE_THEMES, type BuiltinTheme, type ThemePreference } from '../theme-settings.ts'
@@ -34,14 +34,14 @@ interface Cube {
   id: ThemePreference
   labelKey: ThemeKey
   /** Icon for the base cubes; swatch colors for the tinted themes. */
-  visual: { Icon: typeof IconLightOutline16 } | { canvas: string; accent: string }
+  visual: { Icon: typeof IconLightOutlineMedium } | { canvas: string; accent: string }
 }
 
 /** Base cube order and icons (figma 501:30015-30017: Light, Dark, System). */
 const BASE_CUBES: readonly Cube[] = [
-  { id: 'light', labelKey: 'appearance.light', visual: { Icon: IconLightOutline16 } },
-  { id: 'dark', labelKey: 'appearance.dark', visual: { Icon: IconDarkOutline16 } },
-  { id: 'system', labelKey: 'appearance.system', visual: { Icon: IconFollowsystemOutline16 } },
+  { id: 'light', labelKey: 'appearance.light', visual: { Icon: IconLightOutlineMedium } },
+  { id: 'dark', labelKey: 'appearance.dark', visual: { Icon: IconDarkOutlineMedium } },
+  { id: 'system', labelKey: 'appearance.system', visual: { Icon: IconFollowsystemOutlineMedium } },
 ]
 
 /** Tinted cubes in catalog order; the swatch shows the theme's canvas and accent. */

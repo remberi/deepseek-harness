@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-client-ui-companion` 加入了**鲸鱼娘**——一位浮在 Web GUI 之上、可拖到页面任意位置的虚拟 2D 人物。**虚拟人物**设置页提供显示或隐藏她的开关、选择她如何回应鼠标的选择器（点击互动、悬停互动、视线跟随或安静陪伴）、用本地图片替换她形象的上传入口，以及让她回到角落的按钮。开关与选择器存放在 `ui-companion` 设置命名空间中，默认持久化到 `$DSH_HOME/settings.yaml`；形象与拖动位置保存在浏览器的 localStorage 中。在用户打开开关之前她保持隐藏。内置角色是以 data URL 内联的 PNG 加 CSS 动效，因此本包不携带第三方运行时。
+`dsh-client-ui-companion` 加入了**鲸鱼娘**——一位浮在 Web GUI 之上、可拖到页面任意位置的虚拟 2D 人物。**虚拟人物**设置页提供显示或隐藏她的开关、选择她如何回应鼠标的选择器（点击互动、悬停互动、视线跟随或安静陪伴）、用本地图片替换她形象的上传入口，以及让她回到角落的按钮。开关与选择器存放在 `ui-companion` 设置命名空间中，本地提供方默认将其持久化到 `$DSH_HOME/cordis.patch.yml`；形象与拖动位置保存在浏览器的 localStorage 中。在用户打开开关之前她保持隐藏。内置角色是以 data URL 内联的 PNG 加 CSS 动效，因此本包不携带第三方运行时。
 
 ## 目录
 
@@ -51,11 +51,11 @@ kind: "package-reference"
 <details>
 <summary>实现内部 — 点击展开</summary>
 
-Host 半边在组合了设置提供方时，用 `CompanionSettingsSchema` 注册 `ui-companion` 命名空间。浏览器半边通过 `ctx.settingsScope` 绑定该命名空间，用 `CompanionPolicy` 包装，并贡献两个槽位条目，二者通过各自的 `hooks` 区共享策略的两个快照存储：id 为 `companion` 的 `settings.section` 页面（order 22），以及 id 为 `companion` 的 `shell.overlay` 条目。
+Host 半边通过其 `Config` schema 发布 `ui-companion` 条目，并把该 fiber 从生成的设置页上拿掉。浏览器半边通过 `ctx.configForms` 读取同一条目，用 `CompanionPolicy` 包装，并贡献两个槽位条目，二者通过各自的 `hooks` 区共享策略的两个快照存储：id 为 `companion` 的 `settings.section` 页面（order 22），以及 id 为 `companion` 的 `shell.overlay` 条目。
 
 ### 偏好流转
 
-`CompanionPolicy` 以 `{ enabled: false, interaction: 'click' }` 起始，采纳每个被接受的 Host 分区而不回写，用户做出选择时先发布存储再对该字段调用 `scope.set()`，因此浮层在同一 tick 内响应，而写入随后落地。被拒的写入由 scope 恢复，其重载以新分区到达并被策略采纳。非 loopback 页面通过 scope 的内存模式把两个值都保留在进程内。
+`CompanionPolicy` 以 `{ enabled: false, interaction: 'click' }` 起始，采纳每个被接受的 Host 分区而不回写，用户做出选择时先发布存储再对该字段调用 `host.set()`，因此浮层在同一 tick 内响应，而写入随后落地。被拒的写入由表单恢复，其重载以新分区到达并被策略采纳。非 loopback 页面通过表单的内存模式把两个值都保留在进程内。
 
 ### 浏览器本地状态
 

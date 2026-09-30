@@ -1,6 +1,61 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-companion/README.md
-README.md: 68c6a01f38c566716f62de5417ff9ba2d440b5ed
-README.zh.md: 96e8398f32976b349a91aabf9c582aac9ef088bf
+/:
+  en: d9b2456c086790aa
+  zh: 7336e8d2a57775b5
+/deepseek-ai-dsh-client-ui-companion:
+  en: 544954d0b062c6f0
+  zh: 7c56c1f2305591f5
+/deepseek-ai-dsh-client-ui-companion/summary:
+  en: 7f074749d35dabf1
+  zh: 27d85b998ad72de1
+/deepseek-ai-dsh-client-ui-companion/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-companion/use-this-package:
+  en: 7a4e2dc58913d6f0
+  zh: a2607f85ab28524f
+/deepseek-ai-dsh-client-ui-companion/use-this-package/showing-the-character:
+  en: d8056f4b0f0e1f0f
+  zh: daccba63085061a2
+/deepseek-ai-dsh-client-ui-companion/use-this-package/choosing-how-she-reacts:
+  en: 3c5b5e5c796311b8
+  zh: 55e972d65c489066
+/deepseek-ai-dsh-client-ui-companion/use-this-package/moving-her:
+  en: 6feecec889555402
+  zh: ea8be39645c204d4
+/deepseek-ai-dsh-client-ui-companion/use-this-package/custom-artwork:
+  en: 0b545282e5c1704c
+  zh: eba8094908763b28
+/deepseek-ai-dsh-client-ui-companion/understand-the-implementation:
+  en: a18d80300c540067
+  zh: c1ad7a59e6a2760f
+/deepseek-ai-dsh-client-ui-companion/understand-the-implementation/preference-flow:
+  en: 81e9ced985656136
+  zh: 5714f9791b6ebfca
+/deepseek-ai-dsh-client-ui-companion/understand-the-implementation/browser-local-state:
+  en: 00d305c6482c7180
+  zh: 7baee5e97abf98c3
+/deepseek-ai-dsh-client-ui-companion/understand-the-implementation/character-reactions-and-dragging:
+  en: d0d32f075f356030
+  zh: 440ad232f39a3826
+/deepseek-ai-dsh-client-ui-companion/understand-the-implementation/source-map:
+  en: 10573961557697f1
+  zh: 2b36c654b173988b
+/deepseek-ai-dsh-client-ui-companion/further-exploration:
+  en: 0edb3e6e3ec55307
+  zh: b047e4a8fde03b36
+/deepseek-ai-dsh-client-ui-companion/model-experience:
+  en: 3120df665299c634
+  zh: 242f3d68e8267e55
+/deepseek-ai-dsh-client-ui-companion/model-experience/kv-cache-effect:
+  en: ca75c51c89c2c9b0
+  zh: f57cc48a1b5cbfa9
+/deepseek-ai-dsh-client-ui-companion/known-limitations-and-deferred-work:
+  en: a94cb237c143bdbf
+  zh: b89736ebdc529d8f
+/deepseek-ai-dsh-client-ui-companion/known-limitations-and-deferred-work/dev-note:
+  en: 0d2bfdbf2e61cfcd
+  zh: da2e655ae9161bd0

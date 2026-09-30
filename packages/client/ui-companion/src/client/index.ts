@@ -32,8 +32,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 /** Dictionary namespace owned by this plugin. */
 const NS = 'settings.companion'
 
-/** Services required by the preference scope and both registrations. */
-export const inject = ['slots', 'locale', 'settingsScope']
+/** Services required by the configuration form and both registrations. */
+export const inject = ['slots', 'locale', 'configForms']
 
 /**
  * Bind the companion preferences and contribute the Settings page and the
@@ -45,7 +45,7 @@ export function apply(ctx: ClientContext): void {
 
   const t = ctx.locale.bind(NS)
   const policy = new CompanionPolicy(
-    ctx.settingsScope.bind<CompanionSettings>({ namespace: COMPANION_SETTINGS_NAMESPACE }),
+    ctx.configForms.get<CompanionSettings>(COMPANION_SETTINGS_NAMESPACE),
   )
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({

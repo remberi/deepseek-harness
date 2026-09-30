@@ -25,4 +25,4 @@ Windows 目录选择器的主层此前是围绕 WinForms `FolderBrowserDialog` s
 - 每台 Windows 机器都得到带其所支持的最佳 DPI 感知（1703+ 为 per-monitor-v2）的现代对话框，无论是否安装 PowerShell。
 - 真实对话框的渲染与完成选择的流程仍需在 Windows 上手动检查（自动关闭冒烟测试证明打开／中止／收尾）。
 - 所用 COM vtable 槽位与 GUID 是冻结的 Windows ABI（Vista 起）；koffi 签名错误可能引发原生访问冲突，但被限制在对话框子进程内——宿主 Node 进程存活，失败原样上报（无回退层；见[链删除](../simplification/2026-08-04-drop-windows-powershell-picker-fallback.zh.md)）。mocked-koffi 的 ABI 固定测试与真实 win32 冒烟测试正是为了在交付前捕获这类错误。
-- 对话框子进程环境始终包含 `ELECTRON_RUN_AS_NODE=1` 和一份白名单父环境拷贝，使打包后的 Electron `process.execPath` 以 Node 运行 worker，而不是第二个 GUI 实例（[spawn 环境](../bug-fix/2026-09-02-electron-dialog-worker-run-as-node.zh.md)）。选中路径用 `lstrcpynW` 拷贝，而不是 `koffi.view`（[路径拷贝](../bug-fix/2026-09-02-electron-koffi-view-fatal.zh.md)）。单元测试固定该变量和白名单。在打包构建里打开真实对话框仍是手动 Windows 检查；源码侧与普通 Node 下构建出的 `lib/worker.cjs` 仍被覆盖。
+- 打包二进制路径——打包后的可执行文件以对话框入口形式自我 spawn——不受任何自动化测试覆盖。源码侧与普通 Node 下构建出的 `lib/worker.cjs` 已被覆盖；打包后的自我 spawn 仍是一项明确的覆盖缺口。

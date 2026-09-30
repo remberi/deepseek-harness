@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-client-ui-companion` adds the **Whale girl**, a virtual 2D character who floats over the Web GUI and can be dragged anywhere on the page. The **Virtual character** Settings page carries the switch that shows or hides her, a selector for how she reacts to the pointer (click to talk, wave on hover, follow the pointer, or quiet company), an upload that replaces her artwork with a local image, and a button that returns her to the corner. The switch and selector live in the `ui-companion` settings namespace, persisted in `$DSH_HOME/settings.yaml` by default; the artwork and dragged position stay in the browser's localStorage. She stays hidden until a user turns her on. The built-in character is a PNG inlined as a data URL with CSS motion; there is no third-party runtime.
+`dsh-client-ui-companion` adds the **Whale girl**, a virtual 2D character who floats over the Web GUI and can be dragged anywhere on the page. The **Virtual character** Settings page carries the switch that shows or hides her, a selector for how she reacts to the pointer (click to talk, wave on hover, follow the pointer, or quiet company), an upload that replaces her artwork with a local image, and a button that returns her to the corner. The switch and selector live in the `ui-companion` settings namespace, which the local provider persists in `$DSH_HOME/cordis.patch.yml` by default; the artwork and dragged position stay in the browser's localStorage. She stays hidden until a user turns her on. The built-in character is a PNG inlined as a data URL with CSS motion; there is no third-party runtime.
 
 ## Table of Contents
 
@@ -51,11 +51,11 @@ Press the character and drag: once the pointer travels more than 4 px she follow
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-The Host half registers the `ui-companion` namespace with `CompanionSettingsSchema` when a settings provider is composed. The browser half binds that namespace through `ctx.settingsScope`, wraps it in `CompanionPolicy`, and contributes two slot entries that share the policy's two snapshot stores through their `hooks` compartments: the `settings.section` page with id `companion` (order 22) and the `shell.overlay` entry with id `companion`.
+The Host half publishes the `ui-companion` entry through its `Config` schema and keeps that fiber off generated settings pages. The browser half reads the same entry through `ctx.configForms`, wraps it in `CompanionPolicy`, and contributes two slot entries that share the policy's two snapshot stores through their `hooks` compartments: the `settings.section` page with id `companion` (order 22) and the `shell.overlay` entry with id `companion`.
 
 ### Preference flow
 
-`CompanionPolicy` seeds `{ enabled: false, interaction: 'click' }`, adopts each accepted Host section without writing it back, and on a user choice publishes the store first and then calls `scope.set()` for that one field, so the overlay reacts in the same tick while the write settles. A rejected write is recovered by the scope, whose reload arrives as a new section the policy adopts. Non-loopback pages keep both values process-local through the scope's memory mode.
+`CompanionPolicy` seeds `{ enabled: false, interaction: 'click' }`, adopts each accepted Host section without writing it back, and on a user choice publishes the store first and then calls `host.set()` for that one field, so the overlay reacts in the same tick while the write settles. A rejected write is recovered by the form, whose reload arrives as a new section the policy adopts. Non-loopback pages keep both values process-local through the form's memory mode.
 
 ### Browser-local state
 

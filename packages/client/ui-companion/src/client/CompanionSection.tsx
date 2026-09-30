@@ -6,7 +6,7 @@
 
 import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { Button, IconChevronDownOutline14, Menu, Switch } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, IconChevronDownOutlineRegular, Menu, Switch } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { COMPANION_INTERACTIONS, type CompanionInteraction, type CompanionSettings } from '../companion-settings.ts'
 import { CompanionArtwork } from './CompanionArtwork.tsx'
@@ -108,7 +108,7 @@ export function CompanionSection({
       onClick={() => { setOpen(value => !value) }}
     >
       {t(`interaction.${interaction}`)}
-      <IconChevronDownOutline14 className={css.chevron} />
+      <IconChevronDownOutlineRegular className={css.chevron} />
     </button>
   )
 

@@ -6,7 +6,7 @@ import { cleanup } from '@testing-library/react'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { SettingsScope, SettingsScopeSnapshot, SettingsScopeSpec } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ConfigForm, ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import { usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
 import type { CompanionSettings } from '../src/companion-settings.ts'
@@ -22,20 +22,21 @@ async function bench() {
   await ctx.plugin(SlotRegistry).await()
   const locale = new LocaleRuntime(ctx)
   ctx.provide('locale', locale)
-  const section = createSnapshotStore<SettingsScopeSnapshot<CompanionSettings>>({
+  const section = createSnapshotStore<ConfigFormSnapshot<CompanionSettings>>({
     status: 'ready', value: { enabled: false, interaction: 'click' },
     base: undefined, user: undefined, revision: 0, writable: true, mode: 'host',
   })
-  const set = vi.fn<SettingsScope<CompanionSettings>['set']>(() => Promise.resolve())
-  const bind = vi.fn((_spec: SettingsScopeSpec<CompanionSettings>): SettingsScope<CompanionSettings> => ({
+  const set = vi.fn<ConfigForm<CompanionSettings>['set']>(() => Promise.resolve(true))
+  const form: ConfigForm<CompanionSettings> = {
     getSnapshot: () => section.getSnapshot(),
     subscribe: listener => section.subscribe(listener),
     set,
-    unset: () => Promise.resolve(),
-    mutate: () => Promise.resolve(),
-  }))
-  ctx.provide('settingsScope', { bind } as never)
-  return { ctx, slots: ctx.get('slots') as SlotRegistry, locale, bind, set, section }
+    unset: () => Promise.resolve(true),
+    mutate: () => Promise.resolve(true),
+  }
+  const get = vi.fn((_entryId: string): ConfigForm<CompanionSettings> => form)
+  ctx.provide('configForms', { get } as never)
+  return { ctx, slots: ctx.get('slots') as SlotRegistry, locale, get, set, section }
 }
 
 function declare(slots: SlotRegistry): () => void {
@@ -50,14 +51,14 @@ function declare(slots: SlotRegistry): () => void {
 
 describe('ui-companion browser plugin', () => {
   it('declares the slot, locale, and settings-scope services', () => {
-    expect(inject).toEqual(['slots', 'locale', 'settingsScope'])
+    expect(inject).toEqual(['slots', 'locale', 'configForms'])
   })
 
   it('binds the namespace once and registers the page and the overlay with localized copy', async () => {
     const b = await bench()
     declare(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
-    expect(b.bind).toHaveBeenCalledExactlyOnceWith({ namespace: 'ui-companion' })
+    expect(b.get).toHaveBeenCalledExactlyOnceWith('ui-companion')
 
     const page = b.slots.entries('settings.section')[0]!
     expect(page.component).toBe(CompanionSection)

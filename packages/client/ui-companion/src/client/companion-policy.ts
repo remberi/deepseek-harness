@@ -1,7 +1,7 @@
 /** Host-backed companion visibility and interaction preferences plus browser-local artwork and position. */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SettingsScope } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
 import {
   COMPANION_ENABLED_FIELD, COMPANION_INTERACTION_FIELD, DEFAULT_COMPANION_SETTINGS,
   type CompanionInteraction, type CompanionSettings,
@@ -20,9 +20,9 @@ export class CompanionPolicy {
   readonly local: SnapshotStore<CompanionLocalState> = createSnapshotStore(readCompanionLocalState())
 
   /**
-   * @param host - durable companion settings scope.
+   * @param host - durable companion configuration form.
    */
-  constructor(private readonly host: SettingsScope<CompanionSettings>) {
+  constructor(private readonly host: ConfigForm<CompanionSettings>) {
     host.subscribe(() => { this.adopt() })
     this.adopt()
   }

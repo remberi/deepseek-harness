@@ -12,7 +12,7 @@ A second failure happens at pack time. pnpm 11 refuses Node below 22.13, and the
 
 ## Decision
 
-`@deepseek-ai/dsh-electron` depends on `electron@^44.1.0`, whose 44.1.0 release embeds Node 24.19.0. The main process asserts the same `engines.node` floor before spawning `dsh web`, prepends `--expose-internals` so Cordis HMR can reach Node's ESM loader, and a failed boot shows `dialog.showErrorBox` so a double-clicked app is not a silent exit.
+`@deepseek-ai/dsh-electron` depends on `electron@44.0.0`, whose fingerprint `node-addon-require-builtin` accepts (Node 24 under Electron 44.0.0). Later 44.x releases such as 44.4.1 ship Node 24.21.0 / V8 15.2.124.19-electron.0 and fail host preparation. The main process asserts the same `engines.node` floor before spawning `dsh web`, prepends `--expose-internals` so Cordis HMR can reach Node's ESM loader, and a failed boot shows `dialog.showErrorBox` so a double-clicked app is not a silent exit.
 
 The lockfile stores package integrity without pinning `tarball:` hosts. pnpm 11 compares those hosts to the active registry's metadata and fails with `ERR_PNPM_TARBALL_URL_MISMATCH` when a previous install wrote npmmirror URLs while `~/.npmrc` points at registry.npmjs.org, which is what made `pnpm deploy` look like a missing-dependency install.
 

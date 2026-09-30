@@ -2,7 +2,7 @@
  * Stage a portable `dsh` install for electron-builder extraResources.
  */
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { generateIcons } from './generate-icons.mjs'
@@ -83,6 +83,7 @@ function readdirSyncSafe(directory) {
  * @returns {Array<[string, string]>}
  */
 function packagesFromFlatRoot(root) {
+  if (!existsSync(root)) return []
   return readdirSync(root, { withFileTypes: true })
     .filter(entry => entry.isDirectory())
     .flatMap((entry) => {
@@ -114,7 +115,7 @@ function sourceRuntimePackages() {
     ...packagesFromFlatRoot(join(repoRoot, 'vendor')),
     ...packagesFromGroupedRoot(join(repoRoot, 'packages')),
     ...packagesFromFlatRoot(join(repoRoot, 'apps')).filter(([name]) => APP_RUNTIME_PACKAGES.has(name)),
-    ...packagesFromFlatRoot(join(repoRoot, 'native/landlock-run/packages')),
+    ...packagesFromFlatRoot(join(repoRoot, 'native/system/packages')),
   ]
 }
 
@@ -140,17 +141,26 @@ rmSync(target, { recursive: true, force: true })
 mkdirSync(target, { recursive: true })
 
 console.log(`prepare-resources: deploying dsh-electron-runtime-closure to ${target}`)
-runPnpm([
-  '--filter',
-  'dsh-electron-runtime-closure',
-  'deploy',
-  '--legacy',
-  '--prod',
-  '--config.node-linker=hoisted',
-  '--config.auto-install-peers=false',
-  '--config.link-workspace-packages=true',
-  target,
-], repoRoot)
+const workspaceStatePath = join(repoRoot, 'node_modules/.pnpm-workspace-state-v1.json')
+const workspaceState = existsSync(workspaceStatePath) ? readFileSync(workspaceStatePath) : undefined
+try {
+  runPnpm([
+    '--filter',
+    'dsh-electron-runtime-closure',
+    'deploy',
+    '--legacy',
+    '--prod',
+    '--config.node-linker=hoisted',
+    '--config.auto-install-peers=false',
+    '--config.link-workspace-packages=true',
+    // The workspace osx-sign patch is for apps/desktop signing, not this closure.
+    '--config.allowUnusedPatches=true',
+    target,
+  ], repoRoot)
+} finally {
+  // `pnpm deploy --prod` rewrites the workspace installer state as production/hoisted.
+  if (workspaceState !== undefined) writeFileSync(workspaceStatePath, workspaceState)
+}
 
 const deployedBin = join(target, 'node_modules/@deepseek-ai/dsh/lib/bin.js')
 if (!existsSync(deployedBin)) {

@@ -12,7 +12,7 @@ Status: implemented
 
 ## 决策
 
-`@deepseek-ai/dsh-electron` 依赖 `electron@^44.1.0`，其 44.1.0 发行版嵌入 Node 24.19.0。主进程在 spawn `dsh web` 之前断言同一 `engines.node` 下限，并前置 `--expose-internals` 以便 Cordis HMR 访问 Node 的 ESM loader；启动失败时调用 `dialog.showErrorBox`，避免双击应用时无提示退出。
+`@deepseek-ai/dsh-electron` 依赖 `electron@44.0.0`，该指纹是 `node-addon-require-builtin` 所接受的（Electron 44.0.0 下的 Node 24）。后续 44.x（例如 44.4.1）会带上 Node 24.21.0 / V8 15.2.124.19-electron.0，host 准备阶段会失败。主进程在 spawn `dsh web` 之前断言同一 `engines.node` 下限，并前置 `--expose-internals` 以便 Cordis HMR 访问 Node 的 ESM loader；启动失败时调用 `dialog.showErrorBox`，避免双击应用时无提示退出。
 
 lockfile 只记录包完整性，不再钉住 `tarball:` 主机。pnpm 11 会把这些主机与当前 registry 的 metadata 比较：若先前安装写入了 npmmirror URL，而 `~/.npmrc` 指向 registry.npmjs.org，就会以 `ERR_PNPM_TARBALL_URL_MISMATCH` 失败，表现为 `pnpm deploy` 像缺依赖一样装不上。
 

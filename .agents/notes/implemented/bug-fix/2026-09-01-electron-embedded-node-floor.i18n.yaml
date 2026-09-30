@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-01-electron-embedded-node-floor.md
-2026-09-01-electron-embedded-node-floor.md: 2cce2c7543bc391e91c6fd026d67d521b04bad25
-2026-09-01-electron-embedded-node-floor.zh.md: 0c503c5c021cd0a01e9d161051c192fd0e0cb6ff
+2026-09-01-electron-embedded-node-floor.md: a8872ec0d822797dae8557c82a06ee1af7ff7b1b
+2026-09-01-electron-embedded-node-floor.zh.md: 407b4b02e4e4fb3a9d896f6d7fcd98d6d9246912

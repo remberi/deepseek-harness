@@ -34,7 +34,7 @@ function assertHarnessNode(): void {
   const minor = Number(minorRaw)
   if ((major === 22 && minor >= 19) || major >= 24) return
   throw new Error(
-    `dsh-electron: Node ${version} is below ^22.19.0 || >=24.0.0; Electron must ship Node 22.19+ or 24+ (Electron 44.1 ships Node 24.19)`,
+    `dsh-electron: Node ${version} is below ^22.19.0 || >=24.0.0; Electron must ship Node 22.19+ or 24+ (Electron 44.0 ships Node 24)`,
   )
 }
 

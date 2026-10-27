@@ -1,0 +1,8 @@
+# Development overlay: load the Skills plugin from this checkout.
+# Source launches resolve plugin rows from the profile directory, so local
+# workspace packages must be named by absolute path.
+- insert:
+    - id: skill-manager
+      name: '/Volumes/F/deepseek/deepseek-harness/packages/experimental/skill-manager/lib/index.js'
+    - id: ui-skill-manager
+      name: '/Volumes/F/deepseek/deepseek-harness/packages/experimental/client-ui-skill-manager/lib/index.js'

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Prompt library">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#eef2ff"/>
+  <rect x="14" y="18" width="36" height="8" rx="3" fill="#c7d2fe"/>
+  <rect x="14" y="30" width="36" height="20" rx="5" fill="#4d6bfe"/>
+  <path d="M21 37h22M21 43h14" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M22 52.5 27 49l-5-3.5Z" fill="#4d6bfe"/>
+</svg>

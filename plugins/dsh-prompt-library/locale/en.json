@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Prompt library",
+    "description": "Save reusable prompts by category and tag, seed them from built-in templates, import or export them as JSON, and insert one into the composer from a picker."
+  }
+}

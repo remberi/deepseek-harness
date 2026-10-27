@@ -1,0 +1,38 @@
+{
+  "name": "@local/dsh-account-balance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shows the remaining account balance in the sidebar account menu and opens the top-up page in a new tab.",
+  "icon": "./icon.svg",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "screenshots"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings-account"
+      ]
+    }
+  },
+  "license": "MIT"
+}

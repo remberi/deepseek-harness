@@ -1,0 +1,22 @@
+[Unit]
+Description=DSH skill publisher (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=skillsvc
+Group=skillsvc
+WorkingDirectory=/opt/dsh-skill-publisher
+Environment=SKILL_ROOT=/srv/dsh-skills
+Environment=HOST=0.0.0.0
+Environment=PORT=8005
+Environment=PYTHONUNBUFFERED=1
+# Single worker: index rebuilds rely on an in-process lock.
+ExecStart=/opt/dsh-skill-publisher/.venv/bin/uvicorn app:app --host 0.0.0.0 --port 8005 --workers 1
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

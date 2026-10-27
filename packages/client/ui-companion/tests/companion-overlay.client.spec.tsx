@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 import type { CompanionSettings } from '../src/companion-settings.ts'
 import { DEFAULT_COMPANION_LOCAL_STATE, type CompanionLocalState } from '../src/client/companion-local.ts'
 import { CompanionOverlay, DEFAULT_POSITION, type CompanionOverlayProps } from '../src/client/CompanionOverlay.tsx'
@@ -22,6 +23,7 @@ function mount(initial: CompanionSettings, local: CompanionLocalState = DEFAULT_
   const localSource = createSnapshotStore(local)
   const setPosition = vi.fn()
   const props: CompanionOverlayProps = {
+    ...({} as GlobalStandardProps),
     useSessions: unusedHook, useSessionStatus: unusedHook, useSessionRetainInfo: unusedHook,
     usePanelInfo: unusedHook, useWorkspaces: unusedHook, useResource: unusedHook,
     useCompanion: bindSnapshotSelector(source),

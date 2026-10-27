@@ -17,7 +17,6 @@ function fakeScope(value: CompanionSettings | undefined) {
     user: undefined,
     revision: 0,
     writable: true,
-    mode: 'host',
   })
   const set = vi.fn<ConfigForm<CompanionSettings>['set']>(() => Promise.resolve(true))
   const form: ConfigForm<CompanionSettings> = {

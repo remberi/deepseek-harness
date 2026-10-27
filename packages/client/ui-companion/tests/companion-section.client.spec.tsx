@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 import type { CompanionInteraction, CompanionSettings } from '../src/companion-settings.ts'
 import { DEFAULT_COMPANION_LOCAL_STATE, MAX_ARTWORK_BYTES, type CompanionLocalState } from '../src/client/companion-local.ts'
 import { CompanionSection, type CompanionSectionProps } from '../src/client/CompanionSection.tsx'
@@ -28,6 +29,7 @@ function mount(
   const setArtwork = vi.fn((artwork: string | null) => { localSource.update((draft) => { draft.artwork = artwork }) })
   const resetPosition = vi.fn(() => { localSource.update((draft) => { draft.position = null }) })
   const props: CompanionSectionProps = {
+    ...({} as GlobalStandardProps),
     close: () => {},
     useSessions: unusedHook, useSessionStatus: unusedHook, useSessionRetainInfo: unusedHook,
     usePanelInfo: unusedHook, useWorkspaces: unusedHook, useResource: unusedHook,

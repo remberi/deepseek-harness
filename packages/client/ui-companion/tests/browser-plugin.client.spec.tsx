@@ -24,7 +24,7 @@ async function bench() {
   ctx.provide('locale', locale)
   const section = createSnapshotStore<ConfigFormSnapshot<CompanionSettings>>({
     status: 'ready', value: { enabled: false, interaction: 'click' },
-    base: undefined, user: undefined, revision: 0, writable: true, mode: 'host',
+    base: undefined, user: undefined, revision: 0, writable: true,
   })
   const set = vi.fn<ConfigForm<CompanionSettings>['set']>(() => Promise.resolve(true))
   const form: ConfigForm<CompanionSettings> = {

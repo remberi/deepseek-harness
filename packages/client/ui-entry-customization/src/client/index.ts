@@ -1,4 +1,4 @@
-/** Rows for the More menus of the left sidebar, Conversation View tabs, and right-sidebar guide. */
+/** Rows for the More menus of the left sidebar and right-sidebar guide (not the conversation View tab row). */
 import type { Context } from '@deepseek-ai/cordis'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
@@ -54,10 +54,6 @@ export function apply(ctx: Context): void {
   ctx.slots.inject('sidebar.panellist.actions', () => ctx.slots.register({
     name: 'sidebar.panellist.actions', id: 'entry-customization', locale: 'entryCustomization',
     inject: () => injected('sidebar'),
-  }, EntryMenuContent))
-  ctx.slots.inject('conversation.session.header.views.actions', () => ctx.slots.register({
-    name: 'conversation.session.header.views.actions', id: 'entry-customization', locale: 'entryCustomization',
-    inject: () => injected('conversation'),
   }, EntryMenuContent))
   ctx.slots.inject('sidebar.right.tab.guide.actions', () => ctx.slots.register({
     name: 'sidebar.right.tab.guide.actions', id: 'entry-customization', locale: 'entryCustomization',

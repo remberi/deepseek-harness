@@ -1,4 +1,4 @@
-/** The built-in theme catalog both halves read: ids, schemes, and the tinted themes' token symmetry. */
+/** The built-in theme catalog both halves read: ids, schemes, and token symmetry. */
 import { describe, expect, it } from 'vitest'
 import {
   BUILTIN_BASE_THEMES, BUILTIN_STYLE_THEMES, BUILTIN_THEMES, builtinTheme, THEME_PREFERENCES,
@@ -12,23 +12,9 @@ describe('built-in theme catalog', () => {
     for (const theme of BUILTIN_THEMES) expect(builtinTheme(theme.id)).toBe(theme)
   })
 
-  it('base themes override nothing; every tinted theme overrides the same token set', () => {
+  it('base themes override nothing; tinted catalog is empty', () => {
     for (const theme of BUILTIN_BASE_THEMES) expect(theme.tokens).toEqual({})
-    const [first, ...rest] = BUILTIN_STYLE_THEMES
-    const names = Object.keys(first!.tokens).sort()
-    expect(names.length).toBeGreaterThan(0)
-    for (const theme of rest) expect(Object.keys(theme.tokens).sort()).toEqual(names)
-  })
-
-  it('tinted themes paint the same canvas and accent the boot stylesheet and swatch use', () => {
-    for (const theme of BUILTIN_STYLE_THEMES) {
-      expect(theme.tokens['--dsw-alias-bg-base']).toBe(theme.canvas)
-      expect(theme.tokens['--dsw-alias-brand-primary']).toBe(theme.accent)
-      expect(theme.tokens['--dsw-alias-border-l2']).toMatch(/^rgba\(\d+, \d+, \d+, 0\.12\)$/)
-    }
-    expect(BUILTIN_STYLE_THEMES.map(theme => [theme.id, theme.colorScheme])).toEqual([
-      ['claudeCode', 'light'], ['codex', 'light'],
-    ])
+    expect(BUILTIN_STYLE_THEMES).toEqual([])
   })
 
   it('freezes the catalog rows and their tokens', () => {

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Sticky notes",
+    "description": "A sticky-note todo board docked to the right edge: each note carries a priority, an importance level and its own paper colour, the panel can be hidden at any time, and the notes flutter in the wind unless Settings turns the effect off. Data stays in this browser."
+  }
+}

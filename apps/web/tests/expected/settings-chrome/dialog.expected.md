@@ -16,8 +16,6 @@
   - button "浅色"
   - button "深色"
   - button "跟随系统" [pressed]
-  - button "Claude Code"
-  - button "Codex"
   - text: 字号大小 仅影响会话内容的字号 14
   - button "增大字号"
   - button "减小字号"

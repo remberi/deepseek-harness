@@ -418,7 +418,7 @@ describe('web e2e: settings modal and General preferences', () => {
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  async function selectTheme(cube: Locator, preference: 'light' | 'dark' | 'system' | 'claudeCode' | 'codex'): Promise<void> {
+  async function selectTheme(cube: Locator, preference: 'light' | 'dark' | 'system'): Promise<void> {
     // Optimistic UI and a file value from an earlier gesture do not prove this write finished.
     const [response] = await Promise.all([
       page.waitForResponse((candidate) => {
@@ -560,30 +560,6 @@ describe('web e2e: settings modal and General preferences', () => {
     await expect.poll(async () => readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8'), { timeout: 5_000 })
       .toContain('preference: dark')
 
-    const claudeCodeCube = dialog.getByRole('button', { name: 'Claude Code' })
-    await selectTheme(claudeCodeCube, 'claudeCode')
-    await expect.poll(() => claudeCodeCube.getAttribute('aria-pressed'), { timeout: 5_000 }).toBe('true')
-    const claudeCode = await readState()
-    expect(claudeCode.attr).toBe(false)
-    expect(claudeCode.token).toBe('rgb(250, 248, 245)')
-    expectThemeColorSynchronized(claudeCode)
-    await expect.poll(async () => readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8'), { timeout: 5_000 })
-      .toContain('preference: claudeCode')
-
-    const codexCube = dialog.getByRole('button', { name: 'Codex' })
-    await selectTheme(codexCube, 'codex')
-    await expect.poll(() => codexCube.getAttribute('aria-pressed'), { timeout: 5_000 }).toBe('true')
-    const codex = await readState()
-    expect(codex.attr).toBe(false)
-    expect(codex.token).toBe('rgb(247, 249, 252)')
-    expectThemeColorSynchronized(codex)
-    await expect.poll(async () => readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8'), { timeout: 5_000 })
-      .toContain('preference: codex')
-
-    await selectTheme(darkCube, 'dark')
-    await expect.poll(() => darkCube.getAttribute('aria-pressed'), { timeout: 5_000 }).toBe('true')
-    await expect.poll(async () => readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8'), { timeout: 5_000 })
-      .toContain('preference: dark')
     await page.keyboard.press('Escape')
 
     // Reload: the preference survives the background Host read + presenter update.

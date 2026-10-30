@@ -22,7 +22,6 @@
       "types": "./lib/types/client/index.d.ts",
       "default": "./lib/client.js"
     },
-    "./assets/*": "./lib/assets/*",
     "./src/*": "./src/*",
     "./package.json": "./package.json",
     "./brand-font.css": "./lib/styles/brand-font.css",
@@ -67,7 +66,6 @@
     "locale/*.json",
     "lib/index.js",
     "lib/client.js",
-    "lib/assets",
     "lib/styles",
     "lib/types/**/*.d.ts"
   ],

@@ -36,7 +36,8 @@ export function EntryMenuContent({
   entries, onOpen, region, onDismiss, usePluginNavigation, browsePlugins, createPlugin, t,
 }: EntryMenuContentProps) {
   const moreEntries = region === 'conversation' ? entries : []
-  const browsable = usePluginNavigation(present => present)
+  const browsable = region !== 'conversation' && usePluginNavigation(present => present)
+  const showCreate = region !== 'conversation'
   return <>
     {moreEntries.map(entry => <MenuItemButton key={entry.id} current={entry.active === true}
       onSelect={() => { onDismiss(); onOpen(entry.id) }}>
@@ -49,9 +50,9 @@ export function EntryMenuContent({
       onSelect={() => { onDismiss(); browsePlugins() }}>
       {t('install')}
     </MenuItemButton>}
-    <MenuItemButton icon={<IconPlusOutlineRegular size={16} />} separatorBefore={!browsable && moreEntries.length > 0}
+    {showCreate && <MenuItemButton icon={<IconPlusOutlineRegular size={16} />} separatorBefore={!browsable && moreEntries.length > 0}
       onSelect={() => { onDismiss(); createPlugin() }}>
       {t('create')}
-    </MenuItemButton>
+    </MenuItemButton>}
   </>
 }

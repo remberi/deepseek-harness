@@ -61,32 +61,28 @@ describe('More menu rows', () => {
     expect(b.onPinnedChange).not.toHaveBeenCalled()
   })
 
-  it.each([true, false])('opens folded Views and marks the active View with plugin navigation present=%s', (browsable) => {
+  it('opens folded Views and marks the active View without plugin footer rows', () => {
     const b = content({ region: 'conversation',
-      usePluginNavigation: select => select(browsable),
       entries: [
         { id: 'notes', label: 'Notes', pinned: true, active: true },
         { id: 'tasks', label: 'Tasks', pinned: true, active: false },
       ],
     })
-    expect(b.view.getAllByRole('menuitem').map(row => row.textContent))
-      .toEqual(['Notes', 'Tasks', ...(browsable ? ['Browse other plugins'] : []), 'Create your plugin'])
+    expect(b.view.getAllByRole('menuitem').map(row => row.textContent)).toEqual(['Notes', 'Tasks'])
     const currentRow = b.view.getByRole('menuitem', { name: 'Notes' })
     expect(currentRow.getAttribute('aria-current')).toBe('page')
     expect(currentRow.querySelector('svg')?.previousElementSibling?.textContent).toBe('Notes')
     expect(b.view.getByRole('menuitem', { name: 'Tasks' }).hasAttribute('aria-current')).toBe(false)
-    expect(b.view.getAllByRole('separator')).toHaveLength(1)
+    expect(b.view.queryByRole('separator')).toBeNull()
     fireEvent.click(b.view.getByRole('menuitem', { name: 'Tasks' }))
     expect(b.onOpen).toHaveBeenCalledExactlyOnceWith('tasks')
     expect(b.onDismiss.mock.invocationCallOrder[0]).toBeLessThan(b.onOpen.mock.invocationCallOrder[0]!)
     expect(b.onPinnedChange).not.toHaveBeenCalled()
   })
 
-  it.each([true, false])('keeps actions unseparated for an empty roster with plugin navigation present=%s', (browsable) => {
-    const b = content({ region: 'conversation', entries: [], usePluginNavigation: select => select(browsable) })
-    expect(b.view.getAllByRole('menuitem').map(row => row.textContent))
-      .toEqual([...(browsable ? ['Browse other plugins'] : []), 'Create your plugin'])
-    expect(b.view.queryByRole('separator')).toBeNull()
+  it('renders no rows for an empty conversation roster', () => {
+    const b = content({ region: 'conversation', entries: [] })
+    expect(b.view.queryAllByRole('menuitem')).toEqual([])
   })
 
   it.each(['sidebar', 'rightbar'] as const)('keeps only creation in %s without plugin navigation', (region) => {
@@ -171,7 +167,9 @@ describe('More menu registrations', () => {
 
   it('registers one row set per region and removes all of them when the plugin unloads', async () => {
     const b = await bench()
-    for (const seat of SEATS) {
+    const registeredSeats = ['sidebar.panellist.actions', 'sidebar.right.tab.guide.actions'] as const
+    expect(b.runtime.slots.entries('conversation.session.header.views.actions')).toEqual([])
+    for (const seat of registeredSeats) {
       expect(b.runtime.slots.entries(seat).map(entry => entry.options.id)).toEqual(['entry-customization'])
       expect(within(b.view.getByRole('menu', { name: seat })).getAllByRole('menuitem').map(row => row.textContent))
         .toEqual(['Browse other plugins', 'Create your plugin'])
@@ -182,16 +180,16 @@ describe('More menu registrations', () => {
     await b.plugin.dispose()
     for (const seat of SEATS) {
       expect(b.runtime.slots.entries(seat)).toEqual([])
-      expect(within(b.view.getByRole('menu', { name: seat })).queryByRole('menuitem')).toBeNull()
+      if (seat !== 'conversation.session.header.views.actions') {
+        expect(within(b.view.getByRole('menu', { name: seat })).queryByRole('menuitem')).toBeNull()
+      }
     }
   })
 
   it.each([
     ['en', 'sidebar.panellist.actions', 'Create a DSH plugin with a left sidebar entry.'],
-    ['en', 'conversation.session.header.views.actions', 'Create a DSH conversation view plugin.'],
     ['en', 'sidebar.right.tab.guide.actions', 'Create a DSH plugin with a right sidebar entry.'],
     ['zh', 'sidebar.panellist.actions', '创建一个带左侧栏入口的 DSH 插件。'],
-    ['zh', 'conversation.session.header.views.actions', '创建一个 DSH 会话视图插件。'],
     ['zh', 'sidebar.right.tab.guide.actions', '创建一个带右侧栏入口的 DSH 插件。'],
   ] as const)('starts an unsent %s Creator draft from %s', async (language, seat, prompt) => {
     const b = await bench(language)
@@ -204,7 +202,6 @@ describe('More menu registrations', () => {
 
   it.each([
     ['sidebar.panellist.actions', 'sidebar'],
-    ['conversation.session.header.views.actions', 'conversation'],
     ['sidebar.right.tab.guide.actions', 'rightbar'],
   ] as const)('reports both footer actions of %s as the %s region before acting', async (seat, region) => {
     const b = await bench()

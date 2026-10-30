@@ -22,8 +22,6 @@ const COPY: Record<string, string> = {
   'appearance.light': 'Light',
   'appearance.dark': 'Dark',
   'appearance.system': 'System',
-  'appearance.claudeCode': 'Claude Code',
-  'appearance.codex': 'Codex',
 }
 
 function emptySessions() {
@@ -70,26 +68,17 @@ describe('AppearanceRow', () => {
     mount('dark')
     expect(screen.getByText('Appearance')).toBeDefined()
     expect(screen.getAllByRole('button').map(button => button.textContent))
-      .toEqual(['Light', 'Dark', 'System', 'Claude Code', 'Codex'])
+      .toEqual(['Light', 'Dark', 'System'])
     expect(pressed(/Dark/)).toBe('true')
     expect(pressed(/Light/)).toBe('false')
     expect(pressed(/System/)).toBe('false')
-    expect(pressed(/Claude Code/)).toBe('false')
   })
 
-  it('base cubes carry icons; product themes carry their own marks', () => {
-    const b = mount('claudeCode')
-    expect(pressed(/Claude Code/)).toBe('true')
-    const light = screen.getByRole('button', { name: /Light/ })
-    expect(light.querySelector('svg')).not.toBeNull()
-    expect(light.querySelector('span')).toBeNull()
-    const claude = screen.getByRole('button', { name: /Claude Code/ })
-    expect(claude.querySelector('svg[aria-hidden="true"] path')?.getAttribute('d'))
-      .toContain('M21 10.5h3v3')
-    const codex = screen.getByRole('button', { name: /Codex/ })
-    expect(codex.querySelector('img[alt=""]')?.getAttribute('src')).toContain('codex-logo.png')
-    fireEvent.click(claude)
-    expect(b.setTheme).toHaveBeenCalledWith('claudeCode')
+  it('each cube carries an icon', () => {
+    mount('light')
+    for (const name of [/Light/, /Dark/, /System/]) {
+      expect(screen.getByRole('button', { name }).querySelector('svg')).not.toBeNull()
+    }
   })
 
   it('click drives setTheme; selection follows the store mirror, not the click echo', () => {

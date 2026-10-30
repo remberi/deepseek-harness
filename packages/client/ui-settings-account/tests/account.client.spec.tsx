@@ -11,6 +11,7 @@ import { AccountPlatformHost } from '../src/client/AccountPlatformHost.tsx'
 import { AccountSection, type AccountSectionInjected, type AccountSnapshot } from '../src/client/AccountSection.tsx'
 import type { BonusNotice } from '../src/client/bonus-notices.ts'
 import type { AccountMenuProps } from '../src/client/AccountMenu.tsx'
+import type { AccountMenuRowOwnerProps } from '../src/client/contract/slots.ts'
 import type {} from '../src/client/index.ts'
 import { en, zh, type AccountKey } from '../src/client/locales.ts'
 import css from '../src/client/AccountSection.module.css'
@@ -23,6 +24,9 @@ const themeOf = (colorScheme: 'light' | 'dark'): ThemeSnapshot => ({
   preference: colorScheme, fontSizes: { text: 14, code: 11, terminal: 13 }, fontFamilies: { text: '', code: '', terminal: '' },
   active: { id: colorScheme, colorScheme, tokens: {} }, themes: [], revision: 0,
 })
+
+/** The launcher declares one menu-row seat; these specs register no rows into it. */
+const noRows: Pick<AccountMenuProps, 'renderSlot'> = { renderSlot: () => null }
 
 function operationsOf(state: Omit<AccountView, 'links'>, details?: Partial<AccountDetails>, pages?: PlatformPages,
   avatar?: AccountAvatarSnapshot): AccountSectionInjected {
@@ -95,7 +99,7 @@ function SharedPlatformHost({ Globals, pages, platform, copy, refreshAccount }: 
  */
 async function accountMenu(operations: AccountSectionInjected, snapshot: () => AccountSnapshot, settingsOpen: boolean) {
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  return <AccountMenu {...({} as GlobalStandardProps)} {...operations}
+  return <AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations}
     settingsOpen={settingsOpen} useAccount={selector => selector(snapshot())} wide
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     openOnboarding={() => {}} openSettings={() => {}} t={key => en[key as AccountKey]} />
@@ -128,7 +132,7 @@ it.each([en, zh].flatMap(copy => ([false, true, 'unknown'] as const).map(running
   const operations = mount({ status: 'credential-stored', attempt: null }, copy)
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} signOut={signOut}
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false} signOut={signOut}
     hasRunningAccountTasks={async () => { if (running === 'unknown') throw new Error('offline'); return running }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
@@ -151,12 +155,36 @@ it.each([en, zh].flatMap(copy => ([false, true, 'unknown'] as const).map(running
   expect(screen.queryByRole('menu')).toBeNull()
 })
 
+it('renders feature rows between Settings and Feedback with the signed-in account facts', async () => {
+  const operations = operationsOf({ status: 'credential-stored', attempt: null }, {
+    balance: { status: 'ready', value: [{ currency: 'CNY', balance: '12.34' }], bonusWallets: [] },
+  })
+  const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
+  const seats: AccountMenuRowOwnerProps[] = []
+  const renderSeat = ((_key: string, owner: AccountMenuRowOwnerProps) => {
+    seats.push(owner)
+    return <button type="button" role="menuitem" onClick={() => { owner.close() }}>Balance {owner.balanceText}</button>
+  }) as AccountMenuProps['renderSlot']
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false}
+    renderSlot={renderSeat}
+    useAccount={selector => selector(operations.hooks.account.getSnapshot())}
+    useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
+    wide openOnboarding={() => {}} openSettings={() => {}} t={key => en[key as AccountKey]} />)
+  fireEvent.click(screen.getByRole('button', { name: en.menu }))
+  expect(screen.getAllByRole('menuitem').map(row => row.textContent)).toEqual([en.settings, 'Balance ¥12.34', en.contactUs, en.signOut])
+  const seat = seats.at(-1)
+  expect(seat).toMatchObject({ signedIn: true, balanceText: '¥12.34', topUpUrl: 'http://localhost:8081/top_up' })
+  expect(typeof seat?.close).toBe('function')
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Balance ¥12.34' }))
+  expect(screen.queryByRole('menu')).toBeNull()
+})
+
 it.each([en, zh])('updates the Settings menu keycaps and accessible combination from its owner', async (copy) => {
   const operations = mount({ status: 'signed-out', attempt: null }, copy)
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   const props: AccountMenuProps = {
-    ...({} as GlobalStandardProps), ...operations, wide: true, settingsOpen: false,
+    ...({} as GlobalStandardProps), ...noRows, ...operations, wide: true, settingsOpen: false,
     useAccount: selector => selector(operations.hooks.account.getSnapshot()),
     useTheme: selector => selector(operations.hooks.theme.getSnapshot()),
     openSettings: vi.fn(() => { expect(document.activeElement).toBe(screen.getByRole('button', { name: copy.menu })) }),
@@ -184,7 +212,7 @@ it.each([en, zh])('offers settings, contact and sign-in from the signed-out acco
   const openSettings = vi.fn()
   const operations = operationsOf({ status: 'signed-out', attempt: null })
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
     t={key => key in copy ? copy[key as AccountKey] : key} />)
@@ -212,7 +240,7 @@ it('reports a failed start in the login dialog, not as a sidebar alert', async (
     snapshot = { ...snapshot, loginVisible: true, loginFailed: true }
     return Promise.reject(new Error('account start failed'))
   })
-  const view = render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} start={start}
+  const view = render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false} start={start}
     useAccount={selector => selector(snapshot)} useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openOnboarding={() => {}} openSettings={() => {}}
     t={key => key in en ? en[key as AccountKey] : key} />)
@@ -220,7 +248,7 @@ it('reports a failed start in the login dialog, not as a sidebar alert', async (
   await act(async () => { fireEvent.click(screen.getByRole('menuitem', { name: en.signIn })) })
   expect(start).toHaveBeenCalledOnce()
   expect(screen.queryByRole('alert')).toBeNull()
-  view.rerender(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} start={start}
+  view.rerender(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false} start={start}
     useAccount={selector => selector(snapshot)} useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openOnboarding={() => {}} openSettings={() => {}}
     t={key => key in en ? en[key as AccountKey] : key} />)
@@ -236,7 +264,7 @@ it('keeps the confirmation dialog open after a failed sign-out', async () => {
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   const signOut = vi.fn((): Promise<void> => Promise.reject(new Error('account sign-out failed')))
-  render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false}
     signOut={signOut}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide
@@ -398,7 +426,7 @@ it.each([
   })
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
@@ -411,7 +439,7 @@ it('shows the same shared picture outcome in settings and the sidebar', async ()
     profile: { status: 'ready', value: { id: null, name: 'User', contact: null, avatarUrl: 'https://example.test/avatar.png' } },
   }, undefined, avatar)
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
@@ -482,7 +510,7 @@ it.each([en, zh])('shows a localized toast when the account credential expires',
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   let expire: (() => void) | undefined
   const unsubscribe = vi.fn()
-  const element = <AccountMenu {...({} as GlobalStandardProps)} {...operations}
+  const element = <AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations}
     settingsOpen={false} subscribeSessionExpired={(listener) => { expire = listener; return unsubscribe }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}
@@ -581,7 +609,9 @@ it('dismisses a collapsed menu and hands its login dialog to the API-key onboard
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   const openOnboarding = vi.fn()
   let snapshot = operations.hooks.account.getSnapshot()
-  const props = { ...({} as GlobalStandardProps), ...operations, wide: false, settingsOpen: false, openSettings: vi.fn(), openOnboarding,
+  const props = {
+    ...({} as GlobalStandardProps), ...noRows, ...operations,
+    wide: false, settingsOpen: false, openSettings: vi.fn(), openOnboarding,
     useAccount: <T,>(select: (value: AccountSnapshot) => T) => select(snapshot),
     useTheme: <T,>(select: (value: ThemeSnapshot) => T) => select(operations.hooks.theme.getSnapshot()),
     t: (key: string) => en[key as AccountKey] }
@@ -692,7 +722,7 @@ it.each([en, zh])('shows live model sign-in guidance without replaying it after 
   const unsubscribe = vi.fn(() => { listener = undefined })
   operations.subscribeModelSignInRequired = (next) => { listener = next; return unsubscribe }
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  const element = <AccountMenu {...({} as GlobalStandardProps)} {...operations}
+  const element = <AccountMenu {...({} as GlobalStandardProps)} {...noRows} {...operations}
     settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}

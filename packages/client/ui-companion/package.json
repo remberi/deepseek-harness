@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-companion",
   "description": "Whale-girl 2D companion: a draggable character over the Web GUI with a Settings page that shows or hides her, selects how she reacts to the pointer, and uploads custom artwork",
-  "version": "0.2.0-rc.2",
+  "version": "0.2.1-rc.3",
   "publishConfig": {
     "access": "public"
   },

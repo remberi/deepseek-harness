@@ -116,13 +116,11 @@ window.__ModuleLoader__.load({
       return pairs
     }
 
-    /** One selectable brand theme: id, settings label, swatch colors, override pairs. */
+    /** One selectable brand theme: id, settings label, and override pairs. */
     function brandTheme(id, labelKey, light, dark) {
       return {
         id,
         labelKey,
-        canvas: light.canvas,
-        accent: light.accent,
         pairs: overlayPairs({ light, dark }),
       }
     }
@@ -231,10 +229,9 @@ window.__ModuleLoader__.load({
       '.dsh-brand-theme-title { font-size: 14px; font-weight: 400; line-height: 22px; color: var(--dsw-alias-label-primary); }',
       '.dsh-brand-theme-description { font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary); }',
       '.dsh-brand-theme-cubes { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }',
-      '.dsh-brand-theme-cube { box-sizing: border-box; flex: 1 1 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 24px; border: 0.5px solid var(--dsw-alias-border-l4); border-radius: var(--dsw-radius-xl); background: transparent; font: inherit; font-size: 14px; line-height: 22px; color: var(--dsw-alias-label-primary); cursor: pointer; }',
+      '.dsh-brand-theme-cube { box-sizing: border-box; flex: 1 1 160px; display: flex; align-items: center; justify-content: center; padding: 16px 24px; border: 0.5px solid var(--dsw-alias-border-l4); border-radius: var(--dsw-radius-xl); background: transparent; font: inherit; font-size: 14px; line-height: 22px; color: var(--dsw-alias-label-primary); cursor: pointer; }',
       '@media (hover: hover) { .dsh-brand-theme-cube:hover:not(.dsh-brand-theme-cube-selected) { background: var(--dsw-alias-interactive-bg-hover); } }',
       '.dsh-brand-theme-cube-selected { background: var(--dsw-alias-bg-module-platform); border-color: var(--dsw-static-neutral-bluish-400); }',
-      '.dsh-brand-theme-swatch { box-sizing: border-box; width: 20px; height: 20px; border-radius: 50%; corner-shape: round; border: 0.5px solid var(--dsw-alias-border-l4); }',
       '@media (max-width: 767px) { html:not([data-windows-titlebar]):not([data-platform=\'darwin\']) .dsh-brand-theme-cube { flex: 1 1 0; padding: 12px 6px; } }',
     ].join('\n')
 
@@ -296,32 +293,14 @@ window.__ModuleLoader__.load({
     /** Applies the selection in this page; persistence is the caller's concern. */
     let renderBrandTheme = () => {}
 
-    /** Swatch disc showing one theme's canvas and accent colors. */
-    function Swatch({ theme }) {
-      return h('span', {
-        className: 'dsh-brand-theme-swatch',
-        style: { background: `linear-gradient(135deg, ${theme.canvas} 50%, ${theme.accent} 50%)` },
-        'aria-hidden': true,
-      })
-    }
-
-    /** Swatch showing the built-in light/dark pair. */
-    function DefaultSwatch() {
-      return h('span', {
-        className: 'dsh-brand-theme-swatch',
-        style: { background: 'linear-gradient(135deg, #ffffff 50%, #151517 50%)' },
-        'aria-hidden': true,
-      })
-    }
-
-    /** One settings cube: swatch, label, and pressed state. */
-    function Cube({ id, label, visual, selected, onSelect }) {
+    /** One settings cube: label and pressed state. */
+    function Cube({ id, label, selected, onSelect }) {
       return h('button', {
         type: 'button',
         className: selected ? 'dsh-brand-theme-cube dsh-brand-theme-cube-selected' : 'dsh-brand-theme-cube',
         'aria-pressed': selected,
         onClick: () => { onSelect(id) },
-      }, visual, label)
+      }, label)
     }
 
     /**
@@ -341,7 +320,6 @@ window.__ModuleLoader__.load({
             key: theme.id,
             id: theme.id,
             label: t(theme.labelKey),
-            visual: h(Swatch, { theme }),
             selected: active === theme.id,
             // Clicking the selected cube returns to the built-in appearance.
             onSelect: selectBrandTheme,
@@ -350,7 +328,6 @@ window.__ModuleLoader__.load({
             key: 'default',
             id: null,
             label: t('label.default'),
-            visual: h(DefaultSwatch),
             selected: active === null,
             onSelect: selectBrandTheme,
           })))

@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-sticky-notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Sticky-note todo board docked to the right edge of the DSH Web GUI: per-note priority, importance and paper colour, hideable panel, and a wind-sway effect that Settings can turn off.",
   "type": "module",

@@ -1445,7 +1445,10 @@ window.__ModuleLoader__.load({
 .dsh-sticky-note-actions .dsh-sticky-icon-btn svg { width: 13px; height: 13px; }
 @media (hover: hover) { .dsh-sticky-note-actions .dsh-sticky-icon-btn:hover { background: rgba(255, 255, 255, 0.55); color: #3f371c; } }
 .dsh-sticky-note-actions .dsh-sticky-icon-btn.dsh-sticky-armed { color: #a52a20; background: rgba(255, 255, 255, 0.6); }
-.dsh-sticky-note-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; max-width: 100%; margin: 2px 0 0; padding-left: 26px; overflow: hidden; font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', 'Segoe Print', 'Comic Sans MS', var(--dsw-font-family, sans-serif); font-size: 14px; line-height: 27px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dsh-sticky-note-text { box-sizing: border-box; max-width: 100%; max-height: max(81px, calc(25vh - 78px)); margin: 2px 0 0; padding-left: 26px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(70, 55, 20, 0.32) transparent; font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', 'Segoe Print', 'Comic Sans MS', var(--dsw-font-family, sans-serif); font-size: 14px; line-height: 27px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dsh-sticky-note-text::-webkit-scrollbar { width: 6px; }
+.dsh-sticky-note-text::-webkit-scrollbar-track { background: transparent; }
+.dsh-sticky-note-text::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(70, 55, 20, 0.32); }
 .dsh-sticky-note-foot { display: flex; justify-content: flex-end; margin-top: 3px; padding-left: 26px; }
 .dsh-sticky-note-date { font-size: 10px; line-height: 14px; color: rgba(69, 58, 31, 0.55); letter-spacing: 0.2px; }
 /* One shared wind cycle: every card uses the same duration and phase, so a full board sways together. */
